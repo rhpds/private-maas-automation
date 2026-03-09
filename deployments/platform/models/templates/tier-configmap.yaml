@@ -1,0 +1,10 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tier-to-group-mapping
+  namespace: redhat-ods-applications
+data:
+  free: "system:authenticated"
+  premium: "system:authenticated"
+  enterprise: "system:authenticated"
