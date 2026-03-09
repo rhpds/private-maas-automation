@@ -1,0 +1,37 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: openshift-ai-operator
+  namespace: openshift-gitops
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    name: in-cluster
+    namespace: redhat-ods-operator
+  project: default
+  sources:
+  - path: charts/install-operators
+    repoURL: https://github.com/jharmison-redhat/openshift-setup
+    targetRevision: ed8c06994034e591f5540e982f9d0b778504d4cc
+    helm:
+      valueFiles:
+        - $values/deployments/infra/openshift-ai-operator/values.yaml
+  - repoURL: {{ .Values.bootstrap.repoURL }}
+    targetRevision: {{ .Values.bootstrap.targetRevision }}
+    ref: values
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 5m
