@@ -9,3 +9,9 @@ operators:
   servicemeshoperator:
     channel: stable
     installPlanApproval: Automatic
+  servicemeshoperator3:
+    channel: stable
+    installPlanApproval: Automatic
+  devspaces:
+    channel: stable
+    installPlanApproval: Automatic
