@@ -6,8 +6,8 @@ metadata:
   namespace: redhat-ods-applications
 data:
   tiers: |
-    {
-      "free": ["system:authenticated"],
-      "premium": ["system:authenticated"],
-      "enterprise": ["system:authenticated"]
-    }
+    [
+      {"name": "free", "allowedGroups": ["system:authenticated"]},
+      {"name": "premium", "allowedGroups": ["system:authenticated"]},
+      {"name": "enterprise", "allowedGroups": ["system:authenticated"]}
+    ]
