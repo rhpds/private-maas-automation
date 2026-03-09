@@ -1,0 +1,28 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: workspace-{{ .Values.tenant.username }}
+  namespace: openshift-gitops
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: {{ .Values.bootstrap.repoURL }}
+    targetRevision: {{ .Values.bootstrap.targetRevision }}
+    path: deployments/tenant/workspace
+    helm:
+      valuesObject:
+        tenant:
+          username: {{ .Values.tenant.username }}
+          domain: {{ .Values.tenant.domain }}
+  destination:
+    name: in-cluster
+    namespace: {{ .Values.tenant.username }}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false

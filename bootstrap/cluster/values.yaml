@@ -1,0 +1,6 @@
+bootstrap:
+  repoURL: https://github.com/rhpds/private-maas-automation
+  targetRevision: main
+
+slackMcpSecret:
+  slackBotToken: "xoxb-your-token"

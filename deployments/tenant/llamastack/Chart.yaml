@@ -1,0 +1,6 @@
+apiVersion: v2
+name: llamastack
+description: Per-tenant LlamaStack deployment and playground
+type: application
+version: 1.0.0
+appVersion: "0.3.0"
