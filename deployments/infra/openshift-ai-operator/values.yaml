@@ -6,3 +6,6 @@ operators:
     namespace: redhat-ods-operator
     operatorGroup:
       enabled: true
+  servicemeshoperator:
+    channel: stable
+    installPlanApproval: Automatic
