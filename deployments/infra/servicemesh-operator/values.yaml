@@ -1,0 +1,5 @@
+operators:
+  servicemeshoperator3:
+    channel: stable
+    installPlanApproval: Automatic
+    startingCSV: servicemeshoperator3.v3.2.2

@@ -2,3 +2,4 @@ operators:
   devspaces:
     channel: stable
     installPlanApproval: Automatic
+    startingCSV: devspacesoperator.v3.26.1
