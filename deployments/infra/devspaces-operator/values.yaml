@@ -1,0 +1,4 @@
+operators:
+  devspaces:
+    channel: stable
+    installPlanApproval: Automatic

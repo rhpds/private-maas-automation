@@ -1,17 +1,7 @@
 operators:
   rhods-operator:
-    channel: stable-3.x
-    installPlanApproval: Manual
-    startingCSV: rhods-operator.3.3.0
+    channel: stable-3.3
+    installPlanApproval: Automatic
     namespace: redhat-ods-operator
     operatorGroup:
       enabled: true
-  servicemeshoperator:
-    channel: stable
-    installPlanApproval: Automatic
-  servicemeshoperator3:
-    channel: stable
-    installPlanApproval: Automatic
-  devspaces:
-    channel: stable
-    installPlanApproval: Automatic
