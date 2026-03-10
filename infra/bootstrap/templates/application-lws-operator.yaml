@@ -11,7 +11,7 @@ metadata:
 spec:
   destination:
     name: in-cluster
-    namespace: openshift-operators
+    namespace: llm
   project: default
   sources:
   - path: charts/install-operators
@@ -27,6 +27,8 @@ spec:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
     retry:
       limit: 5
       backoff:
