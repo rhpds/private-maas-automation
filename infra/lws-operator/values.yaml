@@ -5,3 +5,5 @@ operators:
     namespace: llm
     operatorGroup:
       enabled: true
+    targetNamespaces:
+      - llm
