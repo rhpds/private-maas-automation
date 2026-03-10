@@ -11,7 +11,7 @@ metadata:
 spec:
   destination:
     name: in-cluster
-    namespace: openshift-devspaces
+    namespace: openshift-operators
   project: default
   sources:
   - path: charts/install-operators
@@ -27,8 +27,6 @@ spec:
     automated:
       prune: true
       selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
     retry:
       limit: 5
       backoff:
