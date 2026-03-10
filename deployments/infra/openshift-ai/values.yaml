@@ -1,5 +1,12 @@
 dataScienceCluster:
   components:
+    kserve:
+      managementState: Managed
+      modelsAsService:
+        managementState: Managed
+      nim:
+        managementState: Managed
+      rawDeploymentServiceConfig: Headed
     llamastackoperator:
       managementState: Managed
     trainingoperator:
