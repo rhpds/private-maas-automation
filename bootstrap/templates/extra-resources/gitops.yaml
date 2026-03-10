@@ -10,5 +10,7 @@ kind: ArgoCD
 metadata:
   name: openshift-gitops
   namespace: openshift-gitops
+  annotations:
+    argocd.argoproj.io/sync-options: ServerSideApply=true
 spec:
   resourceTrackingMethod: annotation
