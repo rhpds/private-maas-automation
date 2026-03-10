@@ -1,6 +1,0 @@
-apiVersion: v2
-name: cluster
-description: App-of-apps for infra and platform components
-type: application
-version: 0.1.0
-appVersion: "1.0.0"

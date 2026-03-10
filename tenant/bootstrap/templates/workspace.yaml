@@ -11,7 +11,7 @@ spec:
   source:
     repoURL: {{ .Values.bootstrap.repoURL }}
     targetRevision: {{ .Values.bootstrap.targetRevision }}
-    path: deployments/tenant/workspace
+    path: tenant/workspace
     helm:
       valuesObject:
         tenant:

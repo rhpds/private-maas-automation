@@ -2,7 +2,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: llamastack-{{ .Values.tenant.username }}
+  name: slack-mcp
   namespace: openshift-gitops
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -11,18 +11,15 @@ spec:
   source:
     repoURL: {{ .Values.bootstrap.repoURL }}
     targetRevision: {{ .Values.bootstrap.targetRevision }}
-    path: tenant/llamastack
+    path: platform/slack-mcp
     helm:
       valuesObject:
-        tenant:
-          username: {{ .Values.tenant.username }}
-          domain: {{ .Values.tenant.domain }}
+        slack:
+          botToken: {{ .Values.slackMcpSecret.slackBotToken }}
   destination:
     name: in-cluster
-    namespace: {{ .Values.tenant.username }}
+    namespace: lls-demo
   syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
+    automated: {}
     syncOptions:
-      - CreateNamespace=false
+      - CreateNamespace=true

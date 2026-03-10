@@ -2,7 +2,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: openshift-ai-operator
+  name: devspaces-operator
   namespace: openshift-gitops
   annotations:
     argocd.argoproj.io/sync-wave: "-1"
@@ -11,7 +11,7 @@ metadata:
 spec:
   destination:
     name: in-cluster
-    namespace: redhat-ods-operator
+    namespace: openshift-operators
   project: default
   sources:
   - path: charts/install-operators
@@ -19,7 +19,7 @@ spec:
     targetRevision: ed8c06994034e591f5540e982f9d0b778504d4cc
     helm:
       valueFiles:
-        - $values/deployments/infra/openshift-ai-operator/values.yaml
+        - $values/infra/devspaces-operator/values.yaml
   - repoURL: {{ .Values.bootstrap.repoURL }}
     targetRevision: {{ .Values.bootstrap.targetRevision }}
     ref: values
@@ -27,8 +27,6 @@ spec:
     automated:
       prune: true
       selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
     retry:
       limit: 5
       backoff:
