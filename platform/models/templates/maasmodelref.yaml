@@ -1,0 +1,18 @@
+{{- range .Values.models }}
+---
+apiVersion: maas.opendatahub.io/v1alpha1
+kind: MaaSModelRef
+metadata:
+  name: {{ .name }}
+  namespace: redhat-ods-applications
+  labels:
+    opendatahub.io/dashboard: "true"
+  annotations:
+    alpha.maas.opendatahub.io/tiers: '{{ .tiers | default (list "free" "premium" "enterprise") | toJson }}'
+    openshift.io/display-name: {{ .displayName }}
+spec:
+  modelRef:
+    kind: LLMInferenceService
+    name: {{ .name }}
+    namespace: llm
+{{- end }}
