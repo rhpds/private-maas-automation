@@ -1,0 +1,4 @@
+operators:
+  leader-worker-set:
+    channel: stable-v1.0
+    installPlanApproval: Automatic
