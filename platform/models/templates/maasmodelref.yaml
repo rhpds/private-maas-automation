@@ -8,7 +8,7 @@ metadata:
   labels:
     opendatahub.io/dashboard: "true"
   annotations:
-    alpha.maas.opendatahub.io/tiers: '{{ .tiers | default (list "free" "premium" "enterprise") | toJson }}'
+    opendatahub.io/tiers: '{{ .tiers | default (list "free" "premium" "enterprise") | toJson }}'
     openshift.io/display-name: {{ .displayName }}
 spec:
   modelRef:
