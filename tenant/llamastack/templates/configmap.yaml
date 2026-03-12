@@ -29,8 +29,8 @@ data:
         config:
           api_token: ${env.VLLM_API_TOKEN_1:=fake}
           max_tokens: ${env.VLLM_MAX_TOKENS:=8192}
-          tls_verify: ${env.VLLM_TLS_VERIFY:=true}
-          url: http://maas.{{ .Values.tenant.domain }}/llm/{{ .Values.model.name }}/v1
+          tls_verify: ${env.VLLM_TLS_VERIFY:=false}
+          url: https://{{ .Values.model.name }}-kserve-workload-svc.llm.svc.cluster.local:8000/v1
       vector_io:
       - provider_id: milvus
         provider_type: inline::milvus
@@ -122,5 +122,13 @@ data:
       tool_groups:
       - toolgroup_id: builtin::rag
         provider_id: rag-runtime
+      - toolgroup_id: mcp::kubernetes
+        provider_id: model-context-protocol
+        mcp_endpoint:
+          uri: http://ocp-mcp-server.lls-demo.svc.cluster.local:8080/mcp
+      - toolgroup_id: mcp::slack
+        provider_id: model-context-protocol
+        mcp_endpoint:
+          uri: http://slack-mcp-server.lls-demo.svc.cluster.local/mcp
     server:
       port: 8321
