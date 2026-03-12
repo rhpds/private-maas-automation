@@ -4,7 +4,7 @@ apiVersion: serving.kserve.io/v1alpha1
 kind: LLMInferenceService
 metadata:
   annotations:
-    alpha.maas.opendatahub.io/tiers: '["free", "premium", "enterprise"]'
+    opendatahub.io/tiers: '["free", "premium", "enterprise"]'
     openshift.io/display-name: {{ .displayName }}
   labels:
     opendatahub.io/dashboard: "true"
