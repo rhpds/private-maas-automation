@@ -17,6 +17,7 @@ spec:
         tenant:
           username: {{ .Values.tenant.username }}
           domain: {{ .Values.tenant.domain }}
+          tier: {{ .Values.tenant.tier }}
   destination:
     name: in-cluster
     namespace: {{ .Values.tenant.username }}

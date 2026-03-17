@@ -5,6 +5,7 @@
 tenant:
   username: user1
   domain: apps.cluster.example.com
+  tier: enterprise
 
 namespacePrefix: wksp
 

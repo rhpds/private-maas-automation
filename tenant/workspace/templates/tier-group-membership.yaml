@@ -1,0 +1,67 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tier-group-manager-{{ .Values.tenant.username }}
+  namespace: {{ .Values.namespacePrefix }}-{{ .Values.tenant.username }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: tier-group-manager-{{ .Values.tenant.username }}
+rules:
+- apiGroups:
+  - user.openshift.io
+  resources:
+  - groups
+  resourceNames:
+  - tier-{{ .Values.tenant.tier }}-users
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - user.openshift.io
+  resources:
+  - groups
+  verbs:
+  - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: tier-group-manager-{{ .Values.tenant.username }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: tier-group-manager-{{ .Values.tenant.username }}
+subjects:
+- kind: ServiceAccount
+  name: tier-group-manager-{{ .Values.tenant.username }}
+  namespace: {{ .Values.namespacePrefix }}-{{ .Values.tenant.username }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: add-tier-group-{{ .Values.tenant.username }}
+  namespace: {{ .Values.namespacePrefix }}-{{ .Values.tenant.username }}
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 4
+  template:
+    spec:
+      serviceAccountName: tier-group-manager-{{ .Values.tenant.username }}
+      restartPolicy: OnFailure
+      containers:
+      - name: add-to-group
+        image: registry.redhat.io/openshift4/ose-cli:latest
+        command:
+        - /bin/bash
+        - -c
+        - |
+          if ! oc get group tier-{{ .Values.tenant.tier }}-users &>/dev/null; then
+            oc adm groups new tier-{{ .Values.tenant.tier }}-users
+          fi
+          oc adm groups add-users tier-{{ .Values.tenant.tier }}-users {{ .Values.tenant.username }}
