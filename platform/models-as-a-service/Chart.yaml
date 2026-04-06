@@ -1,0 +1,6 @@
+apiVersion: v2
+name: models-as-a-service
+description: Deployment of Models-as-a-Service platform-level components in RHOAI
+type: application
+version: 0.1.0
+appVersion: 0.1.0

@@ -1,0 +1,29 @@
+global:
+  toolsImage: image-registry.openshift-image-registry.svc:5000/openshift/tools:latest
+
+deployer:
+  domain: apps.cluster.example.com
+  certificateName: cert-manager-ingress-cert
+
+tiers:
+  free:
+    requestRates:
+      - limit: 5
+        window: 2m
+    tokenRates:
+      - limit: 100
+        window: 1m
+  premium:
+    requestRates:
+      - limit: 20
+        window: 2m
+    tokenRates:
+      - limit: 10000
+        window: 1m
+  enterprise:
+    requestRates:
+      - limit: 50
+        window: 2m
+    tokenRates:
+      - limit: 20000
+        window: 1m
