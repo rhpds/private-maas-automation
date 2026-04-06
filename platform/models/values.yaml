@@ -1,5 +1,10 @@
 image: registry.redhat.io/rhaiis/vllm-cuda-rhel9:3.2.5
 
+defaultModelTiers:
+  - free
+  - premium
+  - enterprise
+
 models:
   - name: qwen3-4b-instruct
     displayName: Qwen3 4B Instruct 2507
