@@ -11,8 +11,6 @@ spec:
   limits:
     free-user-tokens:
       rates:
-      - limit: 100
-        window: 1m
         {{- toYaml .Values.tiers.free.tokenRates | nindent 8 }}
       when:
         - predicate: |
