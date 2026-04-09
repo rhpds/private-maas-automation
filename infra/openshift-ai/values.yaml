@@ -4,6 +4,8 @@ dataScienceCluster:
       managementState: Managed
       nim:
         managementState: Managed
+      modelAsService:
+        managementState: Managed
       rawDeploymentServiceConfig: Headed
     llamastackoperator:
       managementState: Managed

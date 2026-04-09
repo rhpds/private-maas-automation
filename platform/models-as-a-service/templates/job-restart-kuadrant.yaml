@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: restart-kuadrant
+  namespace: openshift-operators
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: restart-kuadrant-namespace-edit
+  namespace: openshift-operators
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: edit
+subjects:
+  - kind: ServiceAccount
+    name: restart-kuadrant
+    namespace: openshift-operators
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: restart-kuadrant-script
+  namespace: openshift-operators
+data:
+{{ (.Files.Glob "files/restart-kuadrant.*").AsConfig | indent 2 }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: restart-kuadrant
+  namespace: openshift-operators
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 4
+  template:
+    spec:
+      serviceAccountName: restart-kuadrant
+      restartPolicy: Never
+      containers:
+        - name: restart-kuadrant
+          image: {{ .Values.global.toolsImage }}
+          imagePullPolicy: IfNotPresent
+          workingDir: /app
+          command: ["/app/restart-kuadrant.sh"]
+          args: []
+          volumeMounts:
+            - name: restart-kuadrant-script
+              mountPath: /app
+      volumes:
+        - name: restart-kuadrant-script
+          configMap:
+            name: restart-kuadrant-script
+            defaultMode: 493
