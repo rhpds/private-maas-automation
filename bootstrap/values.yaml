@@ -1,6 +1,6 @@
 bootstrap:
-  repoURL: https://github.com/rhpds/private-maas-automation
-  targetRevision: main
+  repoURL: https://github.com/taylorjordanNC/private-llm-aas
+  targetRevision: rocket-chat
 
 deployer:
   domain: apps.cluster.example.com
