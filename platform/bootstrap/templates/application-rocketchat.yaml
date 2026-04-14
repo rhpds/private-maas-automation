@@ -28,8 +28,8 @@ spec:
           enabled: true
 
         # OpenShift SCC compatibility - remove runAsUser constraints
-        securityContext: {}
-        containerSecurityContext: {}
+        securityContext: null
+        containerSecurityContext: null
 
         # Resource limits for production stability
         resources:
