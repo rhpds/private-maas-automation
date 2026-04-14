@@ -4,6 +4,3 @@ bootstrap:
 
 deployer:
   domain: apps.cluster.example.com
-
-slackMcpSecret:
-  slackBotToken: "xoxb-your-token"

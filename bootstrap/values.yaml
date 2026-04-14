@@ -5,5 +5,7 @@ bootstrap:
 deployer:
   domain: apps.cluster.example.com
 
-slackMcpSecret:
-  slackBotToken: "xoxb-your-token"
+rocketchat:
+  adminUsername: "admin"
+  adminPassword: "admin123"
+  adminEmail: "admin@example.com"

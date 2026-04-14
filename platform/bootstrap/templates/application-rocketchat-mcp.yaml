@@ -2,7 +2,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: slack-mcp
+  name: rocketchat-mcp
   namespace: openshift-gitops
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -11,15 +11,19 @@ spec:
   source:
     repoURL: {{ .Values.bootstrap.repoURL }}
     targetRevision: {{ .Values.bootstrap.targetRevision }}
-    path: platform/slack-mcp
+    path: platform/rocketchat-mcp
     helm:
       valuesObject:
-        slack:
-          botToken: {{ .Values.slackMcpSecret.slackBotToken }}
+        rocketchat:
+          url: "http://rocketchat.rocketchat.svc.cluster.local"
+          # Use secret created by rocketchat bot automation job
+          existingSecret: "rocketchat-mcp-credentials"
   destination:
     name: in-cluster
     namespace: lls-demo
   syncPolicy:
-    automated: {}
+    automated:
+      prune: true
+      selfHeal: true
     syncOptions:
       - CreateNamespace=true

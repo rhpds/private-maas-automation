@@ -1,0 +1,132 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rocketchat
+  namespace: openshift-gitops
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: {{ .Values.bootstrap.repoURL }}
+    targetRevision: {{ .Values.bootstrap.targetRevision }}
+    path: platform/rocketchat
+    helm:
+      valuesObject:
+        host: rocketchat.{{ .Values.deployer.domain }}
+        ingress:
+          enabled: false
+        route:
+          enabled: true
+          tls:
+            termination: edge
+            insecureEdgeTerminationPolicy: Redirect
+
+        # Microservices architecture enabled
+        microservices:
+          enabled: true
+
+        # OpenShift SCC compatibility - remove runAsUser constraints
+        securityContext: {}
+        containerSecurityContext: {}
+
+        # Resource limits for production stability
+        resources:
+          requests:
+            memory: 512Mi
+            cpu: 300m
+          limits:
+            memory: 2Gi
+            cpu: 1000m
+
+        # MongoDB configuration
+        mongodb:
+          # OpenShift SCC compatibility
+          volumePermissions:
+            enabled: false
+          podSecurityContext:
+            enabled: false
+          containerSecurityContext:
+            enabled: false
+          # Storage configuration for AWS EBS
+          persistence:
+            storageClass: gp3-csi
+            size: 10Gi
+          # Resource limits for MongoDB
+          resources:
+            requests:
+              memory: 512Mi
+              cpu: 250m
+            limits:
+              memory: 1Gi
+              cpu: 500m
+
+        # NATS configuration for microservices
+        nats:
+          nats:
+            resources:
+              requests:
+                memory: 128Mi
+                cpu: 100m
+              limits:
+                memory: 256Mi
+                cpu: 200m
+
+        # Monitoring integration
+        podMonitor:
+          enabled: true
+          interval: 30s
+
+        # Initial admin user - auto-created on first run via environment variables
+        extraEnv:
+          # Rocket.Chat will create admin user automatically with these credentials
+          - name: ADMIN_USERNAME
+            value: {{ .Values.rocketchat.adminUsername | quote }}
+          - name: ADMIN_PASS
+            value: {{ .Values.rocketchat.adminPassword | quote }}
+          - name: ADMIN_EMAIL
+            value: {{ .Values.rocketchat.adminEmail | quote }}
+          # Skip setup wizard (fully automated GitOps deployment)
+          - name: OVERWRITE_SETTING_Show_Setup_Wizard
+            value: "completed"
+          # Allow participant self-registration
+          - name: OVERWRITE_SETTING_Accounts_RegistrationForm
+            value: "Public"
+          - name: OVERWRITE_SETTING_Accounts_ManuallyApproveNewUsers
+            value: "false"
+
+        # Bot user automation - creates MCP bot and secret
+        botUser:
+          enabled: true
+          # Admin credentials (matches auto-created admin above)
+          adminUsername: {{ .Values.rocketchat.adminUsername | quote }}
+          adminPassword: {{ .Values.rocketchat.adminPassword | quote }}
+          # Bot user configuration
+          username: "mcp-bot"
+          name: "MCP Bot"
+          email: "mcp-bot@example.com"
+          password: "mcp-bot-password"
+          # Where to create the secret for rocketchat-mcp
+          mcpNamespace: "lls-demo"
+          secretName: "rocketchat-mcp-credentials"
+          rocketchatUrl: "http://rocketchat.rocketchat.svc.cluster.local"
+          # Workshop channel configuration
+          createWorkshopChannel: true
+          workshopChannelName: "workshop"
+          workshopChannelTopic: "Private Model as a Service"
+          workshopChannelDescription: "Channel for workshop participants to see messages from their AI agents"
+          workshopWelcomeMessage: "Welcome to the AI Agents Workshop! Your AI agents can post messages here using the MCP Rocket.Chat integration. Try asking your agent to send a message to this channel!"
+
+        # Increase replicas for HA (optional - adjust based on needs)
+        # replicaCount: 2
+        # minAvailable: 1
+  destination:
+    name: in-cluster
+    namespace: rocketchat
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

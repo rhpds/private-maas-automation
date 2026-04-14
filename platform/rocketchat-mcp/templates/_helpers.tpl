@@ -1,14 +1,14 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "slack-mcp.name" -}}
+{{- define "rocketchat-mcp.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Create a default fully qualified app name.
 */}}
-{{- define "slack-mcp.fullname" -}}
+{{- define "rocketchat-mcp.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -24,16 +24,16 @@ Create a default fully qualified app name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "slack-mcp.chart" -}}
+{{- define "rocketchat-mcp.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "slack-mcp.labels" -}}
-helm.sh/chart: {{ include "slack-mcp.chart" . }}
-{{ include "slack-mcp.selectorLabels" . }}
+{{- define "rocketchat-mcp.labels" -}}
+helm.sh/chart: {{ include "rocketchat-mcp.chart" . }}
+{{ include "rocketchat-mcp.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -43,19 +43,18 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "slack-mcp.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "slack-mcp.name" . }}
+{{- define "rocketchat-mcp.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "rocketchat-mcp.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
-app: slack-mcp-server
 {{- end }}
 
 {{/*
 Secret name
 */}}
-{{- define "slack-mcp.secretName" -}}
-{{- if .Values.slack.existingSecret }}
-{{- .Values.slack.existingSecret }}
+{{- define "rocketchat-mcp.secretName" -}}
+{{- if .Values.rocketchat.existingSecret }}
+{{- .Values.rocketchat.existingSecret }}
 {{- else }}
-{{- include "slack-mcp.fullname" . }}-secret
+{{- include "rocketchat-mcp.fullname" . }}
 {{- end }}
 {{- end }}
