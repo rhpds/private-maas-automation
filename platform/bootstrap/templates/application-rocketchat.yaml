@@ -27,9 +27,6 @@ spec:
         microservices:
           enabled: true
 
-        # OpenShift SCC compatibility - remove runAsUser constraints
-        securityContext: null
-        containerSecurityContext: null
 
         # Resource limits for production stability
         resources:

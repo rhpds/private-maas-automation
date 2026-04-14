@@ -216,12 +216,10 @@ persistence:
 #     memory: 512Mi
 #     cpu: 300m
 
-securityContext:
-  runAsUser: 999
-  fsGroup: 999
+# OpenShift SCC compatibility - let OpenShift assign UIDs dynamically
+securityContext: {}
 
-containerSecurityContext:
-  runAsUser: 999
+containerSecurityContext: {}
 
 serviceAccount:
   # Specifies whether a ServiceAccount should be created
