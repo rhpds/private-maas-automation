@@ -9,6 +9,7 @@ models:
   - name: nemotron-3-nano-30b-a3b
     displayName: NVIDIA Nemotron 3 Nano 30B A3B FP8
     uri: oci://quay.io/jharmison/models:redhatai--nvidia-nemotron-3-nano-30b-a3b-fp8-modelcar
+    resources:  
       limits:
         cpu: "4"
         memory: 24Gi
