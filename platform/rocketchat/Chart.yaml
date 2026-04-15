@@ -5,7 +5,7 @@ appVersion: 8.2.0
 dependencies:
   - name: mongodb
     repository: https://charts.bitnami.com/bitnami
-    version: 13.x.x
+    version: 16.x.x
     condition: mongodb.enabled
   - name: postgresql
     repository: https://charts.bitnami.com/bitnami
