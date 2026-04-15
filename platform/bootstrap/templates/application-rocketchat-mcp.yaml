@@ -15,7 +15,7 @@ spec:
     helm:
       valuesObject:
         rocketchat:
-          url: "http://rocketchat.rocketchat.svc.cluster.local"
+          url: "http://rocketchat-rocketchat.rocketchat.svc.cluster.local"
           # Use secret created by rocketchat bot automation job
           existingSecret: "rocketchat-mcp-credentials"
   destination:

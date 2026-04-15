@@ -15,7 +15,7 @@ service:
 # Rocket.Chat connection settings
 rocketchat:
   # URL to the Rocket.Chat server (internal service URL)
-  url: "http://rocketchat.rocketchat.svc.cluster.local"
+  url: "http://rocketchat-rocketchat.rocketchat.svc.cluster.local"
 
   # Option 1: Use existing secret
   existingSecret: ""

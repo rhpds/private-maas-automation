@@ -92,7 +92,7 @@ spec:
           # Where to create the secret for rocketchat-mcp
           mcpNamespace: "lls-demo"
           secretName: "rocketchat-mcp-credentials"
-          rocketchatUrl: "http://rocketchat.rocketchat.svc.cluster.local"
+          rocketchatUrl: "http://rocketchat-rocketchat.rocketchat.svc.cluster.local"
           # Workshop channel configuration
           createWorkshopChannel: true
           workshopChannelName: "workshop"
