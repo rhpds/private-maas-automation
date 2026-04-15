@@ -7,5 +7,5 @@ tenant:
 
 # Model configuration
 model:
-  name: nemotron-3-nano-30b-a3b
-  displayName: NVIDIA Nemotron 3 Nano 30B A3B FP8
+  name: nvidia-nemotron-nano-9b-v2-quantized-w4a16
+  displayName: NVIDIA Nemotron Nano 9B v2 Quantized (w4a16)
