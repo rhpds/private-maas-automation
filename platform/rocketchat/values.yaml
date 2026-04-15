@@ -124,7 +124,7 @@ affinity: {}
 existingMongodbSecret: ""
 
 ## MongoDB URL if using an externally provisioned MongoDB
-externalMongodbUrl: "mongodb://root:rocketchat-root-password@rocketchat-mongodb:27017/rocketchat?replicaSet=rs0&authSource=admin"
+externalMongodbUrl: "mongodb://root:rocketchat-root-password@rocketchat-rocketchat-mongodb:27017/rocketchat?replicaSet=rs0&authSource=admin"
 
 ##
 ## MongoDB chart configuration
