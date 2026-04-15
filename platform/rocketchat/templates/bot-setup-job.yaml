@@ -157,14 +157,13 @@ spec:
           fi
           echo "Bot User ID: $BOT_USER_ID"
 
-          # Create personal access token for bot using admin privileges
-          echo "Creating personal access token for bot user..."
-          # Use users.createToken which allows admins to create tokens for other users
-          TOKEN_RESPONSE=$(curl -s -X POST "$RC_URL/api/v1/users.createToken" \
-            -H "X-Auth-Token: $AUTH_TOKEN" \
-            -H "X-User-Id: $ADMIN_ID" \
+          # Login as bot user to get auth token
+          echo "Logging in as bot user to generate auth token..."
+          BOT_LOGIN_RESPONSE=$(curl -s -X POST "$RC_URL/api/v1/login" \
             -H "Content-Type: application/json" \
-            -d "{\"userId\":\"$BOT_USER_ID\",\"username\":\"$BOT_USERNAME\"}")
+            -d "{\"user\":\"$BOT_USERNAME\",\"password\":\"$BOT_PASS\"}")
+
+          TOKEN_RESPONSE="$BOT_LOGIN_RESPONSE"
 
           BOT_TOKEN=$(echo "$TOKEN_RESPONSE" | grep -o '"authToken":"[^"]*"' | cut -d'"' -f4)
 
