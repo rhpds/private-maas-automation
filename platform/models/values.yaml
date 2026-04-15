@@ -8,7 +8,7 @@ defaultModelTiers:
 models:
   - name: qwen3-4b-instruct
     displayName: Qwen3 4B Instruct 2507
-    uri: oci://quay.io/jharmison/models:qwen--qwen3-4b-instruct-2507-modelcar
+    uri: oci://registry.redhat.io/rhelai1/modelcar-nvidia-nemotron-nano-9b-v2-fp8-dynamic:1.5
     resources:
       limits:
         cpu: "6"
