@@ -127,10 +127,13 @@ externalMongodbUrl: # mongodb://user:password@localhost:27017/rocketchat
 ### ref https://github.com/helm/charts/tree/master/stable/mongodb#configuration
 ##
 mongodb:
+  storage:
+    requests: 5Gi
+    storageClassName: ''
   image:
     registry: docker.io
     repository: library/mongo
-    tag: "8.0"
+    tag: 8.2.6
   tls:
     image:
       repository: bitnami/nginx
