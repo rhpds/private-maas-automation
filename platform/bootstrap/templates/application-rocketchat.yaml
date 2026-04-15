@@ -37,35 +37,12 @@ spec:
             memory: 2Gi
             cpu: 1000m
 
-        # Allow non-Bitnami images (required for official mongo image)
-        global:
-          security:
-            allowInsecureImages: true
-
-        # MongoDB configuration
+        # MongoDB configuration - using custom StatefulSet
         mongodb:
+          enabled: false
           storage:
             requests: 5Gi
             storageClassName: ''
-          image:
-            registry: docker.io
-            repository: library/mongo
-            tag: 8.2.6
-          # OpenShift SCC compatibility
-          volumePermissions:
-            enabled: false
-          podSecurityContext:
-            enabled: false
-          containerSecurityContext:
-            enabled: false
-          # Resource limits for MongoDB
-          resources:
-            requests:
-              memory: 512Mi
-              cpu: 250m
-            limits:
-              memory: 1Gi
-              cpu: 500m
 
         # NATS configuration for microservices
         nats:

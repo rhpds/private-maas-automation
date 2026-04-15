@@ -124,7 +124,7 @@ affinity: {}
 existingMongodbSecret: ""
 
 ## MongoDB URL if using an externally provisioned MongoDB
-externalMongodbUrl: # mongodb://user:password@localhost:27017/rocketchat
+externalMongodbUrl: "mongodb://root:rocketchat-root-password@rocketchat-mongodb:27017/rocketchat?replicaSet=rs0&authSource=admin"
 
 ##
 ## MongoDB chart configuration
@@ -155,7 +155,7 @@ mongodb:
       repository: bitnami/os-shell
 
   ## Enable or disable MongoDB dependency completely.
-  enabled: true
+  enabled: false
   serviceMonitor:
     enabled: true
   initdbScriptsConfigMap: rocketchat-mongodb-fix-clustermonitor-role-configmap
