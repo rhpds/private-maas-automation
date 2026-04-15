@@ -157,26 +157,20 @@ spec:
           fi
           echo "Bot User ID: $BOT_USER_ID"
 
-          # Create personal access token for bot
-          echo "Creating personal access token for bot..."
-          TOKEN_RESPONSE=$(curl -s -X POST "$RC_URL/api/v1/users.generatePersonalAccessToken" \
+          # Create personal access token for bot using admin privileges
+          echo "Creating personal access token for bot user..."
+          # Use users.createToken which allows admins to create tokens for other users
+          TOKEN_RESPONSE=$(curl -s -X POST "$RC_URL/api/v1/users.createToken" \
             -H "X-Auth-Token: $AUTH_TOKEN" \
             -H "X-User-Id: $ADMIN_ID" \
             -H "Content-Type: application/json" \
-            -d "{\"tokenName\":\"mcp-server-token\",\"bypassTwoFactor\":true}")
+            -d "{\"userId\":\"$BOT_USER_ID\",\"username\":\"$BOT_USERNAME\"}")
 
-          BOT_TOKEN=$(echo "$TOKEN_RESPONSE" | grep -o '"token":"[^"]*"' | cut -d'"' -f4)
+          BOT_TOKEN=$(echo "$TOKEN_RESPONSE" | grep -o '"authToken":"[^"]*"' | cut -d'"' -f4)
 
           if [ -z "$BOT_TOKEN" ]; then
             echo "ERROR: Failed to create bot token"
             echo "Response: $TOKEN_RESPONSE"
-            # Try to get existing token instead
-            echo "Attempting to retrieve existing token..."
-            TOKEN_LIST=$(curl -s -X GET "$RC_URL/api/v1/users.getPersonalAccessTokens" \
-              -H "X-Auth-Token: $AUTH_TOKEN" \
-              -H "X-User-Id: $ADMIN_ID")
-            echo "Token list: $TOKEN_LIST"
-            # For now, we'll exit - manual intervention needed if token creation fails
             exit 1
           fi
           echo "✓ Bot token created successfully"
