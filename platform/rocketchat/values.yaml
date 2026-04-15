@@ -182,7 +182,9 @@ mongodb:
   metrics:
     enabled: true
     image:
-      repository: bitnami/mongodb-exporter
+      registry: docker.io
+      repository: percona/mongodb_exporter
+      tag: "2.43.2"
     serviceMonitor:
       enabled: false # default to false and use ours that checks for the crd
 
