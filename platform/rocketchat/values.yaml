@@ -152,10 +152,12 @@ mongodb:
   initdbScriptsConfigMap: rocketchat-mongodb-fix-clustermonitor-role-configmap
 
   auth:
-    # rootPassword:
+    # Set explicit passwords to avoid random generation
+    rootPassword: "rocketchat-root-password"
     usernames:
       - rocketchat
-    # passwords:
+    passwords:
+      - "rocketchat-password"
     databases:
       - rocketchat
 
