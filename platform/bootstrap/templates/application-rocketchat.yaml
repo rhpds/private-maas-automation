@@ -37,6 +37,11 @@ spec:
             memory: 2Gi
             cpu: 1000m
 
+        # Allow non-Bitnami images (required for official mongo image)
+        global:
+          security:
+            allowInsecureImages: true
+
         # MongoDB configuration
         mongodb:
           storage:

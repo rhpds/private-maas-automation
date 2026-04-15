@@ -11,6 +11,10 @@ global:
   ## Example: "my-registry.internal:5000"
   imageRegistry: ""
 
+  ## Allow non-Bitnami images (required for official mongo image)
+  security:
+    allowInsecureImages: true
+
   ## Uncomment for tainted nodes:
   # tolerations: &tolerations
   #   - key: "dedicated"
