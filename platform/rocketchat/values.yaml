@@ -547,3 +547,6 @@ botUser:
   workshopChannelTopic: "AI Agents Workshop - MCP Integration Demo"
   workshopChannelDescription: "Channel for workshop participants to see messages from their AI agents"
   workshopWelcomeMessage: "Welcome to the AI Agents Workshop! Your AI agents can post messages here using the MCP Rocket.Chat integration. Try asking your agent to send a message to this channel!"
+
+# Trigger upgrade test
+testUpgrade: true
