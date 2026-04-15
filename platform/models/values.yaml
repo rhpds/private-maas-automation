@@ -6,8 +6,8 @@ defaultModelTiers:
   - enterprise
 
 models:
-  - name: qwen3-4b-instruct
-    displayName: Qwen3 4B Instruct 2507
+  - name: nvidia-nemotron-nano-9b-v2-fp8
+    displayName: NVIDIA Nemotron Nano 9b v2 FP8
     uri: oci://registry.redhat.io/rhelai1/modelcar-nvidia-nemotron-nano-9b-v2-fp8-dynamic:1.5
     resources:
       limits:
@@ -19,10 +19,13 @@ models:
         memory: 32Gi
         nvidia.com/gpu: "1"
     extraArgs:
-      - --enable-auto-tool-choice
-      - --tool-call-parser=hermes
-      - --gpu-memory-utilization=0.95
+      - --enable-force-include-usage
       - --max-model-len=131072
+      - --enable-auto-tool-choice
+      - --tool-call-parser=qwen3_coder
+      - --trust-remote-code
+      - --reasoning-parser-plugin=/mnt/models/nano_v3_reasoning_parser.py
+      - --reasoning-parser=nano_v3
     tolerations:
       - effect: NoSchedule
         key: nvidia.com/gpu
