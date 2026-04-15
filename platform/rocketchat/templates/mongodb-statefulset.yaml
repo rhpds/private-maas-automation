@@ -61,6 +61,12 @@ spec:
           args:
             - |
               set -e
+              # Get the pod's FQDN
+              POD_NAME=$(hostname)
+              SERVICE_NAME="{{ include "rocketchat.fullname" . }}-mongodb"
+              NAMESPACE="{{ .Release.Namespace }}"
+              FQDN="${POD_NAME}.${SERVICE_NAME}.${NAMESPACE}.svc.cluster.local:27017"
+
               # Start MongoDB in background
               mongod --bind_ip_all --replSet rs0 &
               MONGO_PID=$!
@@ -73,8 +79,8 @@ spec:
 
               # Initialize replica set if not already initialized
               if ! mongosh --eval "rs.status()" > /dev/null 2>&1; then
-                echo "Initializing replica set..."
-                mongosh --eval 'rs.initiate({_id: "rs0", members: [{_id: 0, host: "localhost:27017"}]})'
+                echo "Initializing replica set with host: ${FQDN}"
+                mongosh --eval "rs.initiate({_id: 'rs0', members: [{_id: 0, host: '${FQDN}'}]})"
               fi
 
               # Wait for MongoDB process
