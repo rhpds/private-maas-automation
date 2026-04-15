@@ -128,8 +128,9 @@ externalMongodbUrl: # mongodb://user:password@localhost:27017/rocketchat
 ##
 mongodb:
   image:
-    repository: bitnami/mongodb
-    tag: "8.0-debian-12"
+    registry: docker.io
+    repository: library/mongo
+    tag: "8.0"
   tls:
     image:
       repository: bitnami/nginx
