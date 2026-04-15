@@ -128,22 +128,23 @@ externalMongodbUrl: # mongodb://user:password@localhost:27017/rocketchat
 ##
 mongodb:
   image:
-    repository: bitnamilegacy/mongodb
+    repository: bitnami/mongodb
+    tag: 8.0.4-debian-12-r0
   tls:
     image:
-      repository: bitnamilegacy/nginx
+      repository: bitnami/nginx
   externalAccess:
     autoDiscovery:
       image:
         registry: docker.io
-        repository: bitnamilegacy/kubectl
+        repository: bitnami/kubectl
   dnsCheck:
     image:
-      repository: bitnamilegacy/os-shell
+      repository: bitnami/os-shell
   volumePermissions:
     enabled: true
     image:
-      repository: bitnamilegacy/os-shell
+      repository: bitnami/os-shell
 
   ## Enable or disable MongoDB dependency completely.
   enabled: true
@@ -173,7 +174,7 @@ mongodb:
   metrics:
     enabled: true
     image:
-      repository: bitnamilegacy/mongodb-exporter
+      repository: bitnami/mongodb-exporter
     serviceMonitor:
       enabled: false # default to false and use ours that checks for the crd
 
