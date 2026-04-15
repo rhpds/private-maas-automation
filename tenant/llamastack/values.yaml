@@ -7,5 +7,5 @@ tenant:
 
 # Model configuration
 model:
-  name: nvidia-nemotron-nano-9b-v2-quantized-w4a16
-  displayName: NVIDIA Nemotron Nano 9B v2 Quantized (w4a16)
+  name: qwen3-4b-instruct
+  displayName: Qwen 3 4B Instruct 2507
