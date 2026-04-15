@@ -7,5 +7,5 @@ tenant:
 
 # Model configuration
 model:
-  name: nvidia-nemotron-nano-9b-v2-fp8
-  displayName: NVIDIA Nemotron Nano 9b v2 FP8
+  name: nemotron-3-nano-30b-a3b
+  displayName: NVIDIA Nemotron 3 Nano 30B A3B FP8

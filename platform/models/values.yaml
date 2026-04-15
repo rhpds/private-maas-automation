@@ -6,29 +6,25 @@ defaultModelTiers:
   - enterprise
 
 models:
-  - name: nvidia-nemotron-nano-9b-v2-fp8
-    displayName: NVIDIA Nemotron Nano 9b v2 FP8
-    uri: oci://registry.redhat.io/rhelai1/modelcar-nvidia-nemotron-nano-9b-v2-fp8-dynamic:1.5
-    resources:
+  - name: nemotron-3-nano-30b-a3b
+    displayName: NVIDIA Nemotron 3 Nano 30B A3B FP8
+    uri: oci://quay.io/jharmison/models:redhatai--nvidia-nemotron-3-nano-30b-a3b-fp8-modelcar
       limits:
-        cpu: "6"
-        memory: 48Gi
+        cpu: "4"
+        memory: 24Gi
         nvidia.com/gpu: "1"
       requests:
-        cpu: "4"
-        memory: 32Gi
+        cpu: "2"
+        memory: 16Gi
         nvidia.com/gpu: "1"
     extraArgs:
       - --enable-force-include-usage
       - --max-model-len=131072
-      - --max-num-seqs=64
-      - --mamba_ssm_cache_dtype=float32
-      - --trust-remote-code
       - --enable-auto-tool-choice
-      - --tool-parser-plugin=/mnt/models/nemotron_toolcall_parser_no_streaming.py
-      - --tool-call-parser=nemotron_json
-      - --reasoning-parser-plugin=/mnt/models/qwen3_reasoning_parser.py
-      - --reasoning-parser=qwen3
+      - --tool-call-parser=qwen3_coder
+      - --trust-remote-code
+      - --reasoning-parser-plugin=/mnt/models/nano_v3_reasoning_parser.py
+      - --reasoning-parser=nano_v3
     tolerations:
       - effect: NoSchedule
         key: nvidia.com/gpu
