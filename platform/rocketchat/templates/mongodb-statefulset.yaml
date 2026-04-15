@@ -40,30 +40,6 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       securityContext: {}
-      initContainers:
-        - name: init-replicaset
-          image: "docker.io/library/mongo:8.2.6"
-          command:
-            - bash
-            - "-c"
-            - |
-              set -ex
-              # Wait for MongoDB to be ready
-              until mongosh --eval "db.adminCommand('ping')" > /dev/null 2>&1; do
-                echo "Waiting for MongoDB to start..."
-                sleep 2
-              done
-              # Initialize replica set if not already initialized
-              if ! mongosh --eval "rs.status()" > /dev/null 2>&1; then
-                echo "Initializing replica set..."
-                mongosh --eval 'rs.initiate({_id: "rs0", members: [{_id: 0, host: "localhost:27017"}]})'
-              fi
-          env:
-            - name: MONGO_INITDB_ROOT_USERNAME
-              value: "root"
-            - name: MONGO_INITDB_ROOT_PASSWORD
-              value: "rocketchat-root-password"
-          securityContext: {}
       containers:
         - name: mongodb
           image: "docker.io/library/mongo:8.2.6"
@@ -80,11 +56,29 @@ spec:
             - name: MONGO_INITDB_DATABASE
               value: "rocketchat"
           command:
-            - mongod
+            - bash
+            - -c
           args:
-            - "--bind_ip_all"
-            - "--replSet"
-            - "rs0"
+            - |
+              set -e
+              # Start MongoDB in background
+              mongod --bind_ip_all --replSet rs0 &
+              MONGO_PID=$!
+
+              # Wait for MongoDB to be ready
+              until mongosh --eval "db.adminCommand('ping')" > /dev/null 2>&1; do
+                echo "Waiting for MongoDB to start..."
+                sleep 2
+              done
+
+              # Initialize replica set if not already initialized
+              if ! mongosh --eval "rs.status()" > /dev/null 2>&1; then
+                echo "Initializing replica set..."
+                mongosh --eval 'rs.initiate({_id: "rs0", members: [{_id: 0, host: "localhost:27017"}]})'
+              fi
+
+              # Wait for MongoDB process
+              wait $MONGO_PID
           volumeMounts:
             - name: datadir
               mountPath: /data/db
