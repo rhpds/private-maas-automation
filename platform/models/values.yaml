@@ -8,7 +8,7 @@ defaultModelTiers:
 models:
   - name: nvidia-nemotron-nano-9b-v2-quantized-w4a16
     displayName: NVIDIA Nemotron Nano 9B v2 Quantized (w4a16)
-    uri: oci://registry.redhat.io/rhelai1/modelcar-nvidia-Nemotron-Nano-9B-v2-quantized.w4a16:1.5
+    uri: oci://registry.redhat.io/rhelai1/modelcar-nvidia-nemotron-nano-9b-v2-quantized.w4a16:1.5
     resources:
       limits:
         cpu: "6"
