@@ -313,6 +313,10 @@ data:
                 # still waiting on a potential tag, so emit nothing yet
                 return None
 
+            # STREAMING: Tool call detected
+            if self.current_tool_id == -1:
+                logger.info(f"STREAMING: First detection of {self.bot_token} in output")
+
             # bit mask flags for partial JSON parsing. If the name hasn't been
             # sent yet, don't allow sending
             # an incomplete string since OpenAI only ever (as far as I have
@@ -326,11 +330,14 @@ data:
                 # to double to allow parsing as JSON since mistral uses single
                 # quotes instead of double for tool calls
                 parsable_arr = current_text.split(self.bot_token)[-1]
-                
+
                 # Check if we're at the end of the tool call
                 if '</TOOLCALL>' in parsable_arr:
                     end_of_call = True
                     parsable_arr = parsable_arr.split('</TOOLCALL>')[0]
+                    logger.info(f"STREAMING: End of tool call detected. Parsable content: {parsable_arr[:300]}")
+                elif len(parsable_arr) > 0 and self.current_tool_id == -1:
+                    logger.info(f"STREAMING: Parsing tool call content: {parsable_arr[:300]}")
 
                 # tool calls are generated in an array, so do partial JSON
                 # parsing on the entire array
@@ -338,7 +345,8 @@ data:
                     tool_call_arr: list[dict] = partial_json_parser.loads(
                         parsable_arr, flags)
                 except (partial_json_parser.core.exceptions.MalformedJSON,
-                        json.JSONDecodeError, ValueError):
+                        json.JSONDecodeError, ValueError) as e:
+                    logger.warning(f"STREAMING: Failed to parse partial JSON. Error: {e}, Content: {parsable_arr[:200]}")
                     return None
 
                 current_tool_call: dict = tool_call_arr[self.current_tool_id] \
@@ -391,7 +399,7 @@ data:
                 if not self.current_tool_name_sent:
                     function_name = current_tool_call.get("name")
                     if function_name:
-
+                        logger.info(f"STREAMING: Sending tool name: {function_name}")
                         delta = DeltaMessage(tool_calls=[
                             DeltaToolCall(index=self.current_tool_id,
                                         type="function",
