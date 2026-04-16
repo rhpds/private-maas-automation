@@ -1,0 +1,92 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nemotron-reasoning-parser
+  namespace: llm
+data:
+  nemotron_nano_v2_reasoning_parser.py: |
+    from collections.abc import Sequence
+    from typing import TYPE_CHECKING
+
+    if TYPE_CHECKING:
+        from vllm.tokenizers import TokenizerLike
+
+    from vllm.entrypoints.openai.protocol import ChatCompletionRequest, DeltaMessage
+    try:
+        from vllm.entrypoints.openai.protocol import ResponsesRequest
+    except ImportError:
+        ResponsesRequest = ChatCompletionRequest
+
+    from vllm.reasoning import ReasoningParser, ReasoningParserManager
+
+
+    @ReasoningParserManager.register_module(name="nemotron_nano_v2", force=True)
+    class NemotronNanoV2ReasoningParser(ReasoningParser):
+        def __init__(self, tokenizer: "TokenizerLike", *args, **kwargs):
+            super().__init__(tokenizer, *args, **kwargs)
+            self.think_start = "<think>"
+            self.think_end = "</think>"
+            self.is_think_end = False
+            self.streaming_buffer = ""
+
+        def is_reasoning_end(self, input_ids: Sequence[int]) -> bool:
+            text = self.model_tokenizer.decode(list(input_ids))
+            return self.think_end in text
+
+        def extract_content_ids(self, input_ids: list[int]) -> list[int]:
+            # For this parser we emit reasoning/content directly from text parsing.
+            return []
+
+        def extract_reasoning(
+            self,
+            model_output: str,
+            request: "ChatCompletionRequest | ResponsesRequest",
+        ) -> tuple[str | None, str | None]:
+            if model_output.startswith(self.think_start):
+                model_output = model_output[len(self.think_start):]
+
+            think_end_idx = model_output.find(self.think_end)
+            if think_end_idx >= 0:
+                reasoning = model_output[:think_end_idx] or None
+                content = model_output[think_end_idx + len(self.think_end):] or None
+                return reasoning, content
+
+            return model_output or None, None
+
+        def extract_reasoning_streaming(
+            self,
+            previous_text: str,
+            current_text: str,
+            delta_text: str,
+            previous_token_ids: Sequence[int],
+            current_token_ids: Sequence[int],
+            delta_token_ids: Sequence[int],
+        ) -> DeltaMessage | None:
+            if self.is_think_end:
+                return DeltaMessage(content=delta_text or None)
+
+            self.streaming_buffer += delta_text
+
+            # Strip a leading <think> if the model emits it.
+            if self.streaming_buffer.startswith(self.think_start):
+                self.streaming_buffer = self.streaming_buffer[len(self.think_start):]
+
+            think_end_idx = self.streaming_buffer.find(self.think_end)
+            if think_end_idx >= 0:
+                self.is_think_end = True
+                reasoning = self.streaming_buffer[:think_end_idx] or None
+                content = self.streaming_buffer[think_end_idx + len(self.think_end):] or None
+                self.streaming_buffer = ""
+                return DeltaMessage(reasoning=reasoning, content=content)
+
+            # Hold back partial </think> fragments so they do not leak into reasoning.
+            for l in range(len(self.think_end) - 1, 0, -1):
+                partial_end = self.think_end[:l]
+                if self.streaming_buffer.endswith(partial_end):
+                    reasoning = self.streaming_buffer[:-l] or None
+                    self.streaming_buffer = self.streaming_buffer[-l:]
+                    return DeltaMessage(reasoning=reasoning) if reasoning else None
+
+            reasoning = self.streaming_buffer or None
+            self.streaming_buffer = ""
+            return DeltaMessage(reasoning=reasoning) if reasoning else None
