@@ -336,8 +336,18 @@ data:
                     end_of_call = True
                     parsable_arr = parsable_arr.split('</TOOLCALL>')[0]
                     logger.info(f"STREAMING: End of tool call detected. Parsable content: {parsable_arr[:300]}")
-                elif len(parsable_arr) > 0 and self.current_tool_id == -1:
-                    logger.info(f"STREAMING: Parsing tool call content: {parsable_arr[:300]}")
+                else:
+                    # Strip any incomplete closing tag to avoid JSON parsing errors
+                    # Check if content ends with a partial closing tag like "</", "</T", "</TOOLC", etc.
+                    closing_tag = '</TOOLCALL>'
+                    for i in range(1, len(closing_tag)):
+                        partial_tag = closing_tag[:i+1]
+                        if parsable_arr.endswith(partial_tag):
+                            parsable_arr = parsable_arr[:-len(partial_tag)]
+                            break
+
+                    if len(parsable_arr) > 0 and self.current_tool_id == -1:
+                        logger.info(f"STREAMING: Parsing tool call content: {parsable_arr[:300]}")
 
                 # tool calls are generated in an array, so do partial JSON
                 # parsing on the entire array
