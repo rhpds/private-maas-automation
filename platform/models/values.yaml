@@ -28,6 +28,7 @@ models:
       - --enable-auto-tool-choice
       - --tool-parser-plugin=/opt/parsers/nemotron_toolcall_parser_streaming.py
       - --tool-call-parser=nemotron_json
+      - --chat-template-content-format=string
     tolerations:
       - effect: NoSchedule
         key: nvidia.com/gpu

@@ -217,12 +217,14 @@ data:
 
             # case -- if a tool call token is not present, return a text response
             if self.bot_token not in model_output:
+                logger.info(f"No {self.bot_token} found in output: {model_output[:200]}")
                 return ExtractedToolCallInformation(tools_called=False,
                                                     tool_calls=[],
                                                     content=model_output)
 
             # first remove the BOT token
             tool_content = model_output.replace(self.bot_token, "").strip()
+            logger.info(f"Tool call detected! Raw content after removing {self.bot_token}: {tool_content[:500]}")
 
             try:
                 # we first try to directly load the json as parsing very nested
@@ -271,8 +273,8 @@ data:
                     tool_calls=tool_calls,
                     content=content if len(content) > 0 else None)
 
-            except Exception:
-                logger.exception("Error in extracting tool call from response.")
+            except Exception as e:
+                logger.exception(f"Error in extracting tool call from response. Content was: {tool_content[:500]}")
                 # return information to just treat the tool call as regular JSON
                 return ExtractedToolCallInformation(tools_called=False,
                                                     tool_calls=[],
@@ -482,6 +484,6 @@ data:
 
                 return delta
 
-            except Exception:
-                logger.exception("Error trying to handle streaming tool call.")
+            except Exception as e:
+                logger.exception(f"Error trying to handle streaming tool call. Current text: {current_text[:200]}, Delta: {delta_text}")
                 return None
