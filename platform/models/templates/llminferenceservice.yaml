@@ -67,6 +67,10 @@ spec:
       - mountPath: /opt/parsers
         name: tool-parser
       {{- end }}
+      {{- if .mountReasoningConfig }}
+      - mountPath: /opt/reasoning-parsers
+        name: reasoning-config
+      {{- end }}
     nodeSelector:
       nvidia.com/gpu.present: "true"
     {{- with .tolerations }}
@@ -81,6 +85,11 @@ spec:
     {{- if .mountToolParser }}
     - name: tool-parser
       configMap:
-        name: nemotron-tool-parser
+        name: {{ .toolParserConfigMapName }}
+    {{- end }}
+    {{- if .mountReasoningConfig }}
+    - name: reasoning-config
+      configMap:
+        name: {{ .reasoningConfigMapName }}
     {{- end }}
 {{- end }}
