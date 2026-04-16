@@ -34,6 +34,7 @@ models:
       - --chat-template-content-format=string
       - --reasoning-parser-plugin=/opt/reasoning-parsers/nemotron_nano_v2_reasoning_parser.py
       - --reasoning-parser=nemotron_nano_v2
+      - --structured-outputs-config.enable_in_reasoning=True
     tolerations:
       - effect: NoSchedule
         key: nvidia.com/gpu
