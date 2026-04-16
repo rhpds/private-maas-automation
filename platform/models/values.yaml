@@ -12,7 +12,7 @@ models:
     mountToolParser: true
     mountReasoningConfig: true
     toolParserConfigMapName: nemotron-tool-parser
-    reasoningConfigMapName: nemotron-reasoning-config
+    reasoningConfigMapName: nemotron-reasoning-parser
     resources:
       limits:
         cpu: "6"
