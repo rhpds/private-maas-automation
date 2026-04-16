@@ -26,15 +26,16 @@ data:
             super().__init__(tokenizer, *args, **kwargs)
             self.think_start = "<think>"
             self.think_end = "</think>"
+            self.tool_start = "<TOOLCALL>"
             self.is_think_end = False
             self.streaming_buffer = ""
+            self.in_thinking = False
 
         def is_reasoning_end(self, input_ids: Sequence[int]) -> bool:
             text = self.model_tokenizer.decode(list(input_ids))
             return self.think_end in text
 
         def extract_content_ids(self, input_ids: list[int]) -> list[int]:
-            # For this parser we emit reasoning/content directly from text parsing.
             return []
 
         def extract_reasoning(
@@ -42,10 +43,23 @@ data:
             model_output: str,
             request: "ChatCompletionRequest | ResponsesRequest",
         ) -> tuple[str | None, str | None]:
-            if model_output.startswith(self.think_start):
-                model_output = model_output[len(self.think_start):]
+            # If the model did not actually start a reasoning trace,
+            # do not classify output as reasoning.
+            if not model_output.startswith(self.think_start):
+                return None, model_output or None
 
+            model_output = model_output[len(self.think_start):]
+
+            tool_idx = model_output.find(self.tool_start)
             think_end_idx = model_output.find(self.think_end)
+
+            # If a tool call appears before </think> (or there is no </think> yet),
+            # keep the tool block in content so the tool parser can see it.
+            if tool_idx >= 0 and (think_end_idx < 0 or tool_idx < think_end_idx):
+                reasoning = model_output[:tool_idx] or None
+                content = model_output[tool_idx:] or None
+                return reasoning, content
+
             if think_end_idx >= 0:
                 reasoning = model_output[:think_end_idx] or None
                 content = model_output[think_end_idx + len(self.think_end):] or None
@@ -62,16 +76,40 @@ data:
             current_token_ids: Sequence[int],
             delta_token_ids: Sequence[int],
         ) -> DeltaMessage | None:
+            # If thinking already ended, everything else is normal content.
             if self.is_think_end:
                 return DeltaMessage(content=delta_text or None)
 
             self.streaming_buffer += delta_text
 
-            # Strip a leading <think> if the model emits it.
-            if self.streaming_buffer.startswith(self.think_start):
-                self.streaming_buffer = self.streaming_buffer[len(self.think_start):]
+            # If we have not actually entered a <think> block and the stream starts
+            # with a tool call or regular content, pass it through as content.
+            if not self.in_thinking:
+                if self.streaming_buffer.startswith(self.think_start):
+                    self.in_thinking = True
+                    self.streaming_buffer = self.streaming_buffer[len(self.think_start):]
+                elif self.tool_start in self.streaming_buffer:
+                    content = self.streaming_buffer or None
+                    self.streaming_buffer = ""
+                    self.is_think_end = True
+                    return DeltaMessage(content=content)
+                else:
+                    # No confirmed thinking block yet; avoid misclassifying text as reasoning.
+                    content = self.streaming_buffer or None
+                    self.streaming_buffer = ""
+                    return DeltaMessage(content=content) if content else None
 
+            # If a tool call begins before </think>, move the tool block to content.
+            tool_idx = self.streaming_buffer.find(self.tool_start)
             think_end_idx = self.streaming_buffer.find(self.think_end)
+
+            if tool_idx >= 0 and (think_end_idx < 0 or tool_idx < think_end_idx):
+                reasoning = self.streaming_buffer[:tool_idx] or None
+                content = self.streaming_buffer[tool_idx:] or None
+                self.streaming_buffer = ""
+                self.is_think_end = True
+                return DeltaMessage(reasoning=reasoning, content=content)
+
             if think_end_idx >= 0:
                 self.is_think_end = True
                 reasoning = self.streaming_buffer[:think_end_idx] or None
