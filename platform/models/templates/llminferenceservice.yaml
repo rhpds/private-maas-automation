@@ -63,6 +63,10 @@ spec:
       volumeMounts:
       - mountPath: /dev/shm
         name: shm
+      {{- if .mountToolParser }}
+      - mountPath: /opt/parsers
+        name: tool-parser
+      {{- end }}
     nodeSelector:
       nvidia.com/gpu.present: "true"
     {{- with .tolerations }}
@@ -74,4 +78,9 @@ spec:
         medium: Memory
         sizeLimit: 2Gi
       name: shm
+    {{- if .mountToolParser }}
+    - name: tool-parser
+      configMap:
+        name: nemotron-tool-parser
+    {{- end }}
 {{- end }}
