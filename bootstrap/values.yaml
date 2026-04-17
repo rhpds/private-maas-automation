@@ -1,5 +1,5 @@
 bootstrap:
-  repoURL: https://github.com/taylorjordanNC/private-llm-aas
+  repoURL: https://github.com/rhpds/private-maas-automation
   targetRevision: rocket-chat
 
 deployer:
