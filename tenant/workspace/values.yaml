@@ -9,11 +9,7 @@ tenant:
 
 namespacePrefix: wksp
 
-devworkspacetemplate:
-  name: che-code-exercises
-  devfile: http://devspaces-dashboard.openshift-devspaces.svc.cluster.local:8080/dashboard/api/editors/devfile?che-editor=che-incubator/che-code/latest
-  codeImage: registry.redhat.io/devspaces/code-rhel9@sha256:7b68bf06abf4f2b948d21ffa82401b44f26965b093e4875653344ae2b7fe46c8
-
+# DevWorkspace configuration
 devworkspace:
   name: exercises
   projects:
@@ -24,3 +20,4 @@ devworkspace:
       container:
         image: registry.redhat.io/devspaces/udi-rhel9:3.21
         sourceMapping: /projects
+        # Note: CHE_DASHBOARD_URL will be set dynamically by the template based on tenant.domain

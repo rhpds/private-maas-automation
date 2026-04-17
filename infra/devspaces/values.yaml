@@ -1,1 +1,11 @@
 ---
+# DevSpaces Infrastructure Configuration
+# This chart deploys a CheCluster resource to openshift-devspaces namespace
+#
+# The CheCluster is minimal by design:
+# - Uses default networking/components (auto-configured by operator)
+# - 20-minute startup timeout for stability
+# - Idling disabled to keep workspaces always available
+#
+# DevWorkspaces are created per-user by tenant/workspace chart
+# and reference this DevSpaces instance for IDE provisioning
