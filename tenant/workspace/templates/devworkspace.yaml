@@ -7,13 +7,6 @@ metadata:
   labels:
     {{- include "workspace.labels" . | nindent 4 }}
     app.kubernetes.io/component: devworkspace
-  annotations:
-    che.eclipse.org/devfile-source: |
-      scm:
-        repo: {{ .Values.devworkspace.projects.repoUrl }}
-        fileName: devfile
-      factory:
-        params: url={{ .Values.devworkspace.projects.repoUrl }}
 spec:
   routingClass: che
   started: true
@@ -53,5 +46,3 @@ spec:
             - name: CHE_DASHBOARD_URL
               value: https://devspaces.{{ .Values.tenant.domain }}
       {{- end }}
-    attributes:
-      controller.devfile.io/storage-type: per-user
