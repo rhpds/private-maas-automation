@@ -1,4 +1,4 @@
-image: registry.redhat.io/rhaiis/vllm-cuda-rhel9:3.3.0
+defaultServingImage: registry.redhat.io/rhaiis/vllm-cuda-rhel9:3.3.0
 
 defaultModelTiers:
   - free
