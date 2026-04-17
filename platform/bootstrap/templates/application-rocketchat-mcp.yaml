@@ -15,15 +15,11 @@ spec:
     helm:
       valuesObject:
         rocketchat:
-          url: "http://rocketchat-rocketchat.rocketchat.svc.cluster.local"
+          url: {{ .Values.rocketchat.botUser.mcp.serviceUrl | quote }}
           # Use secret created by rocketchat bot automation job
-          existingSecret: "rocketchat-mcp-credentials"
+          existingSecret: {{ .Values.rocketchat.botUser.mcp.secretName | quote }}
   destination:
     name: in-cluster
-    namespace: lls-demo
+    namespace: {{ .Values.rocketchat.botUser.mcp.namespace }}
   syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
+    {{- toYaml .Values.rocketchat.argocd.syncPolicy | nindent 4 }}

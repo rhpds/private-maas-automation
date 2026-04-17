@@ -15,50 +15,29 @@ spec:
     helm:
       valuesObject:
         host: rocketchat.{{ .Values.deployer.domain }}
+
         ingress:
-          enabled: false
+          {{- toYaml .Values.rocketchat.ingress | nindent 10 }}
+
         route:
-          enabled: true
-          tls:
-            termination: edge
-            insecureEdgeTerminationPolicy: Redirect
+          {{- toYaml .Values.rocketchat.route | nindent 10 }}
 
-        # Microservices architecture enabled
         microservices:
-          enabled: true
+          {{- toYaml .Values.rocketchat.microservices | nindent 10 }}
 
-
-        # Resource limits for production stability
         resources:
-          requests:
-            memory: 512Mi
-            cpu: 300m
-          limits:
-            memory: 2Gi
-            cpu: 1000m
+          {{- toYaml .Values.rocketchat.resources | nindent 10 }}
 
-        # MongoDB configuration - using custom StatefulSet
         mongodb:
-          enabled: false
-          storage:
-            requests: 5Gi
-            storageClassName: ''
+          {{- toYaml .Values.rocketchat.mongodb | nindent 10 }}
 
-        # NATS configuration for microservices
         nats:
           nats:
             resources:
-              requests:
-                memory: 128Mi
-                cpu: 100m
-              limits:
-                memory: 256Mi
-                cpu: 200m
+              {{- toYaml .Values.rocketchat.nats.resources | nindent 14 }}
 
-        # Monitoring integration
         podMonitor:
-          enabled: true
-          interval: 30s
+          {{- toYaml .Values.rocketchat.monitoring.podMonitor | nindent 10 }}
 
         # Initial admin user - auto-created on first run via environment variables
         extraEnv:
@@ -71,44 +50,36 @@ spec:
             value: {{ .Values.rocketchat.adminEmail | quote }}
           # Skip setup wizard (fully automated GitOps deployment)
           - name: OVERWRITE_SETTING_Show_Setup_Wizard
-            value: "completed"
+            value: {{ .Values.rocketchat.settings.skipSetupWizard | ternary "completed" "pending" | quote }}
           # Allow participant self-registration
           - name: OVERWRITE_SETTING_Accounts_RegistrationForm
-            value: "Public"
+            value: {{ .Values.rocketchat.settings.allowPublicRegistration | ternary "Public" "Disabled" | quote }}
           - name: OVERWRITE_SETTING_Accounts_ManuallyApproveNewUsers
-            value: "false"
+            value: {{ .Values.rocketchat.settings.manuallyApproveNewUsers | quote }}
 
         # Bot user automation - creates MCP bot and secret
         botUser:
-          enabled: true
+          enabled: {{ .Values.rocketchat.botUser.enabled }}
           # Admin credentials (matches auto-created admin above)
           adminUsername: {{ .Values.rocketchat.adminUsername | quote }}
           adminPassword: {{ .Values.rocketchat.adminPassword | quote }}
           # Bot user configuration
-          username: "mcp-bot"
-          name: "MCP Bot"
-          email: "mcp-bot@example.com"
-          password: "mcp-bot-password"
+          username: {{ .Values.rocketchat.botUser.username | quote }}
+          name: {{ .Values.rocketchat.botUser.name | quote }}
+          email: {{ .Values.rocketchat.botUser.email | quote }}
+          password: {{ .Values.rocketchat.botUser.password | quote }}
           # Where to create the secret for rocketchat-mcp
-          mcpNamespace: "lls-demo"
-          secretName: "rocketchat-mcp-credentials"
-          rocketchatUrl: "http://rocketchat-rocketchat.rocketchat.svc.cluster.local"
+          mcpNamespace: {{ .Values.rocketchat.botUser.mcp.namespace | quote }}
+          secretName: {{ .Values.rocketchat.botUser.mcp.secretName | quote }}
+          rocketchatUrl: {{ .Values.rocketchat.botUser.mcp.serviceUrl | quote }}
           # Workshop channel configuration
-          createWorkshopChannel: true
-          workshopChannelName: "workshop"
-          workshopChannelTopic: "Private Model as a Service"
-          workshopChannelDescription: "Channel for workshop participants to see messages from their AI agents"
-          workshopWelcomeMessage: "Welcome to the AI Agents Workshop! Your AI agents can post messages here using the MCP Rocket.Chat integration. Try asking your agent to send a message to this channel!"
-
-        # Increase replicas for HA (optional - adjust based on needs)
-        # replicaCount: 2
-        # minAvailable: 1
+          createWorkshopChannel: {{ .Values.rocketchat.botUser.workshopChannel.enabled }}
+          workshopChannelName: {{ .Values.rocketchat.botUser.workshopChannel.name | quote }}
+          workshopChannelTopic: {{ .Values.rocketchat.botUser.workshopChannel.topic | quote }}
+          workshopChannelDescription: {{ .Values.rocketchat.botUser.workshopChannel.description | quote }}
+          workshopWelcomeMessage: {{ .Values.rocketchat.botUser.workshopChannel.welcomeMessage | quote }}
   destination:
     name: in-cluster
-    namespace: rocketchat
+    namespace: {{ .Values.rocketchat.argocd.namespace }}
   syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
+    {{- toYaml .Values.rocketchat.argocd.syncPolicy | nindent 4 }}

@@ -4,3 +4,94 @@ bootstrap:
 
 deployer:
   domain: apps.cluster.example.com
+
+rocketchat:
+  # Admin credentials - auto-created on first deployment
+  adminUsername: admin
+  adminPassword: changeme
+  adminEmail: admin@example.com
+
+  # ArgoCD configuration
+  argocd:
+    namespace: rocketchat
+    syncPolicy:
+      automated:
+        prune: true
+        selfHeal: true
+      syncOptions:
+        - CreateNamespace=true
+
+  # Networking configuration
+  ingress:
+    enabled: false
+  route:
+    enabled: true
+    tls:
+      termination: edge
+      insecureEdgeTerminationPolicy: Redirect
+
+  # Architecture configuration
+  microservices:
+    enabled: true
+
+  # Resource limits for production stability
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 300m
+    limits:
+      memory: 2Gi
+      cpu: 1000m
+
+  # MongoDB configuration - using custom StatefulSet
+  mongodb:
+    enabled: false
+    storage:
+      requests: 5Gi
+      storageClassName: ''
+
+  # NATS configuration for microservices
+  nats:
+    resources:
+      requests:
+        memory: 128Mi
+        cpu: 100m
+      limits:
+        memory: 256Mi
+        cpu: 200m
+
+  # Monitoring integration
+  monitoring:
+    podMonitor:
+      enabled: true
+      interval: 30s
+
+  # Rocket.Chat settings overrides
+  settings:
+    skipSetupWizard: true
+    allowPublicRegistration: true
+    manuallyApproveNewUsers: false
+
+  # Bot user automation - creates MCP bot and secret
+  botUser:
+    enabled: true
+    username: mcp-bot
+    name: MCP Bot
+    email: mcp-bot@example.com
+    password: mcp-bot-password
+    # MCP integration configuration
+    mcp:
+      namespace: lls-demo
+      secretName: rocketchat-mcp-credentials
+      serviceUrl: http://rocketchat-rocketchat.rocketchat.svc.cluster.local
+    # Workshop channel configuration
+    workshopChannel:
+      enabled: true
+      name: workshop
+      topic: Private Model as a Service
+      description: Channel for workshop participants to see messages from their AI agents
+      welcomeMessage: "Welcome to the AI Agents Workshop! Your AI agents can post messages here using the MCP Rocket.Chat integration. Try asking your agent to send a message to this channel!"
+
+  # High availability (optional - uncomment to enable)
+  # replicaCount: 2
+  # minAvailable: 1
