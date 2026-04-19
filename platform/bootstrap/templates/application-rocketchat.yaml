@@ -51,9 +51,6 @@ spec:
           # Skip setup wizard (fully automated GitOps deployment)
           - name: OVERWRITE_SETTING_Show_Setup_Wizard
             value: {{ .Values.rocketchat.settings.skipSetupWizard | ternary "completed" "pending" | quote }}
-          # Force Site URL to prevent workspace ID mismatch errors
-          - name: OVERWRITE_SETTING_Site_Url
-            value: https://rocketchat.{{ .Values.deployer.domain }}
           # Allow participant self-registration
           - name: OVERWRITE_SETTING_Accounts_RegistrationForm
             value: {{ .Values.rocketchat.settings.allowPublicRegistration | ternary "Public" "Disabled" | quote }}
