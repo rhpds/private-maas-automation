@@ -31,4 +31,3 @@ users:
 {{- else }}
 users: []
 {{- end }}
-

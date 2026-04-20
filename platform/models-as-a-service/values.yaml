@@ -27,3 +27,5 @@ tiers:
     tokenRates:
       - limit: 20000
         window: 1m
+    users:
+      - admin

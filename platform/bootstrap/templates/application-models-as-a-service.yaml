@@ -26,3 +26,10 @@ spec:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - RespectIgnoreDifferences=true
+  ignoreDifferences:
+    - kind: Group
+      group: user.openshift.io
+      jsonPointers:
+        - /users
