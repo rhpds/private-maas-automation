@@ -13,11 +13,11 @@ namespacePrefix: wksp
 devworkspace:
   name: exercises
   projects:
-    repoUrl: https://github.com/taylorjordanNC/coding-exercises
+    repoUrl: https://github.com/rh-ai-quickstart/maas-code-assistant.git
     revision: main
   components:
     - name: universal-developer-image
       container:
-        image: registry.redhat.io/devspaces/udi-rhel9:3.21
+        image: registry.redhat.io/devspaces/udi-rhel9:3.25.0
         sourceMapping: /projects
         # Note: CHE_DASHBOARD_URL will be set dynamically by the template based on tenant.domain
