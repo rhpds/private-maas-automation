@@ -18,6 +18,9 @@ spec:
           username: {{ .Values.tenant.username }}
           domain: {{ .Values.tenant.domain }}
           tier: {{ .Values.tenant.tier }}
+        rocketchat:
+          # Use tenant password for RocketChat login
+          tenantPassword: {{ .Values.tenant.password | quote }}
   destination:
     name: in-cluster
     namespace: {{ .Values.tenant.username }}

@@ -21,3 +21,28 @@ devworkspace:
         image: registry.redhat.io/devspaces/udi-rhel9:3.21
         sourceMapping: /projects
         # Note: CHE_DASHBOARD_URL will be set dynamically by the template based on tenant.domain
+
+# RocketChat tenant user configuration
+rocketchat:
+  enabled: true
+  url: "http://rocketchat-rocketchat.rocketchat.svc.cluster.local"
+
+  # Admin credentials for user creation
+  adminUsername: "admin"
+  adminPassword: "changeme"
+
+  # Tenant user configuration
+  # Password should be unique per tenant - can be generated or set via override
+  tenantPassword: "changeme-tenant-password"
+
+  # Optional: override display name and email
+  # tenantDisplayName: "User 1"
+  # tenantEmail: "user1@example.com"
+
+  # AgnosticV Integration (following slack-mcp pattern)
+  # If set, use this existing secret instead of creating one
+  # Secret must contain keys: admin-password, tenant-password
+  existingSecret: ""
+
+  # Secret name for output credentials (created by the job)
+  outputSecretName: "rocketchat-user-credentials"
