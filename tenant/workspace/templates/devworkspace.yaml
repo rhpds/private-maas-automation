@@ -1,36 +1,48 @@
 ---
-apiVersion: workspace.devfile.io/v1alpha2
 kind: DevWorkspace
+apiVersion: workspace.devfile.io/v1alpha2
 metadata:
   name: {{ .Values.devworkspace.name }}
   namespace: {{ .Values.namespacePrefix }}-{{ .Values.tenant.username }}
-  annotations:
-    che.eclipse.org/che-editor: che-incubator/che-code/latest
-    che.eclipse.org/devfile: |
-      schemaVersion: 2.3.0
-    che.eclipse.org/devfile-source: |
-      scm:
-        repo: {{ .Values.devworkspace.projects.repoUrl }}.git
-        fileName: repo
-      factory:
-        params: url={{ .Values.devworkspace.projects.repoUrl }}
+  labels:
+    {{- include "workspace.labels" . | nindent 4 }}
+    app.kubernetes.io/component: devworkspace
 spec:
   routingClass: che
   started: true
   contributions:
-  - name: editor
-    kubernetes:
-      name: {{ .Values.devworkspacetemplate.name }}
+    - name: ide
+      uri: http://devspaces-dashboard.openshift-devspaces.svc.cluster.local:8080/dashboard/api/editors/devfile?che-editor=che-incubator/che-code/latest
   template:
     projects:
-    - name: {{ .Values.devworkspace.name }}
-      git:
-        remotes:
-          origin: {{ .Values.devworkspace.projects.repoUrl }}.git
-        checkoutFrom:
-          revision: {{ .Values.devworkspace.projects.revision }}
+      - name: {{ .Values.devworkspace.name }}
+        git:
+          remotes:
+            origin: {{ .Values.devworkspace.projects.repoUrl }}
+          checkoutFrom:
+            revision: {{ .Values.devworkspace.projects.revision }}
     components:
-    {{- toYaml .Values.devworkspace.components | nindent 4 }}
-    attributes:
-      controller.devfile.io/bootstrap-devworkspace: true
-      controller.devfile.io/storage-type: per-user
+      {{- if .Values.devworkspace.components }}
+      {{- range .Values.devworkspace.components }}
+      - name: {{ .name }}
+        container:
+          image: {{ .container.image }}
+          sourceMapping: {{ .container.sourceMapping | default "/projects" }}
+          {{- if .container.env }}
+          env:
+            {{- toYaml .container.env | nindent 10 }}
+          {{- else }}
+          env:
+            - name: CHE_DASHBOARD_URL
+              value: https://devspaces.{{ $.Values.tenant.domain }}
+          {{- end }}
+      {{- end }}
+      {{- else if .Values.devworkspace.image }}
+      - name: dev-container
+        container:
+          image: {{ .Values.devworkspace.image }}
+          sourceMapping: /projects
+          env:
+            - name: CHE_DASHBOARD_URL
+              value: https://devspaces.{{ .Values.tenant.domain }}
+      {{- end }}

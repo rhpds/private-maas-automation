@@ -1,0 +1,85 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rocketchat
+  namespace: openshift-gitops
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: {{ .Values.bootstrap.repoURL }}
+    targetRevision: {{ .Values.bootstrap.targetRevision }}
+    path: platform/rocketchat
+    helm:
+      valuesObject:
+        host: rocketchat.{{ .Values.deployer.domain }}
+
+        ingress:
+          {{- toYaml .Values.rocketchat.ingress | nindent 10 }}
+
+        route:
+          {{- toYaml .Values.rocketchat.route | nindent 10 }}
+
+        microservices:
+          {{- toYaml .Values.rocketchat.microservices | nindent 10 }}
+
+        resources:
+          {{- toYaml .Values.rocketchat.resources | nindent 10 }}
+
+        mongodb:
+          {{- toYaml .Values.rocketchat.mongodb | nindent 10 }}
+
+        nats:
+          nats:
+            resources:
+              {{- toYaml .Values.rocketchat.nats.resources | nindent 14 }}
+
+        podMonitor:
+          {{- toYaml .Values.rocketchat.monitoring.podMonitor | nindent 10 }}
+
+        # Initial admin user - auto-created on first run via environment variables
+        extraEnv:
+          # Rocket.Chat will create admin user automatically with these credentials
+          - name: ADMIN_USERNAME
+            value: {{ .Values.rocketchat.adminUsername | quote }}
+          - name: ADMIN_PASS
+            value: {{ .Values.rocketchat.adminPassword | quote }}
+          - name: ADMIN_EMAIL
+            value: {{ .Values.rocketchat.adminEmail | quote }}
+          # Skip setup wizard (fully automated GitOps deployment)
+          - name: OVERWRITE_SETTING_Show_Setup_Wizard
+            value: {{ .Values.rocketchat.settings.skipSetupWizard | ternary "completed" "pending" | quote }}
+          # Allow participant self-registration
+          - name: OVERWRITE_SETTING_Accounts_RegistrationForm
+            value: {{ .Values.rocketchat.settings.allowPublicRegistration | ternary "Public" "Disabled" | quote }}
+          - name: OVERWRITE_SETTING_Accounts_ManuallyApproveNewUsers
+            value: {{ .Values.rocketchat.settings.manuallyApproveNewUsers | quote }}
+
+        # Bot user automation - creates MCP bot and secret
+        botUser:
+          enabled: {{ .Values.rocketchat.botUser.enabled }}
+          # Admin credentials (matches auto-created admin above)
+          adminUsername: {{ .Values.rocketchat.adminUsername | quote }}
+          adminPassword: {{ .Values.rocketchat.adminPassword | quote }}
+          # Bot user configuration
+          username: {{ .Values.rocketchat.botUser.username | quote }}
+          name: {{ .Values.rocketchat.botUser.name | quote }}
+          email: {{ .Values.rocketchat.botUser.email | quote }}
+          password: {{ .Values.rocketchat.botUser.password | quote }}
+          # Where to create the secret for rocketchat-mcp
+          mcpNamespace: {{ .Values.rocketchat.botUser.mcp.namespace | quote }}
+          secretName: {{ .Values.rocketchat.botUser.mcp.secretName | quote }}
+          rocketchatUrl: {{ .Values.rocketchat.botUser.mcp.serviceUrl | quote }}
+          # Workshop channel configuration
+          createWorkshopChannel: {{ .Values.rocketchat.botUser.workshopChannel.enabled }}
+          workshopChannelName: {{ .Values.rocketchat.botUser.workshopChannel.name | quote }}
+          workshopChannelTopic: {{ .Values.rocketchat.botUser.workshopChannel.topic | quote }}
+          workshopChannelDescription: {{ .Values.rocketchat.botUser.workshopChannel.description | quote }}
+          workshopWelcomeMessage: {{ .Values.rocketchat.botUser.workshopChannel.welcomeMessage | quote }}
+  destination:
+    name: in-cluster
+    namespace: {{ .Values.rocketchat.argocd.namespace }}
+  syncPolicy:
+    {{- toYaml .Values.rocketchat.argocd.syncPolicy | nindent 4 }}

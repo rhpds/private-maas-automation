@@ -7,5 +7,5 @@ tenant:
 
 # Model configuration
 model:
-  name: qwen3-4b-instruct
-  displayName: Qwen 3 4B Instruct 2507
+  name: nemotron-3-nano-30b-a3b
+  displayName: NVIDIA Nemotron 3 Nano 30B A3B FP8

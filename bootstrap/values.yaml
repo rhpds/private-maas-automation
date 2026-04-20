@@ -1,9 +1,11 @@
 bootstrap:
   repoURL: https://github.com/rhpds/private-maas-automation
-  targetRevision: main
+  targetRevision: rocket-chat
 
 deployer:
   domain: apps.cluster.example.com
 
-slackMcpSecret:
-  slackBotToken: "xoxb-your-token"
+rocketchat:
+  adminUsername: "admin"
+  adminPassword: "admin123"
+  adminEmail: "admin@example.com"

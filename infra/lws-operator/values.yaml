@@ -2,8 +2,8 @@ operators:
   leader-worker-set:
     channel: stable-v1.0
     installPlanApproval: Automatic
-    namespace: llm
+    namespace: openshift-lws-operator
     operatorGroup:
       enabled: true
     targetNamespaces:
-      - llm
+      - openshift-lws-operator

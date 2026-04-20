@@ -1,14 +1,14 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "slack-mcp.name" -}}
+{{- define "workspace.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Create a default fully qualified app name.
 */}}
-{{- define "slack-mcp.fullname" -}}
+{{- define "workspace.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -24,38 +24,38 @@ Create a default fully qualified app name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "slack-mcp.chart" -}}
+{{- define "workspace.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "slack-mcp.labels" -}}
-helm.sh/chart: {{ include "slack-mcp.chart" . }}
-{{ include "slack-mcp.selectorLabels" . }}
+{{- define "workspace.labels" -}}
+helm.sh/chart: {{ include "workspace.chart" . }}
+{{ include "workspace.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+app.kubernetes.io/part-of: che.eclipse.org
 {{- end }}
 
 {{/*
 Selector labels
 */}}
-{{- define "slack-mcp.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "slack-mcp.name" . }}
+{{- define "workspace.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "workspace.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
-app: slack-mcp-server
 {{- end }}
 
 {{/*
-Secret name
+Get list of users - for single-user deployment, returns array with one user
 */}}
-{{- define "slack-mcp.secretName" -}}
-{{- if .Values.slack.existingSecret }}
-{{- .Values.slack.existingSecret }}
+{{- define "workspace.users" -}}
+{{- if .Values.users }}
+{{- toJson .Values.users }}
 {{- else }}
-{{- include "slack-mcp.fullname" . }}-secret
+{{- toJson (list .Values.tenant.username) }}
 {{- end }}
 {{- end }}

@@ -126,9 +126,9 @@ data:
         provider_id: model-context-protocol
         mcp_endpoint:
           uri: http://ocp-mcp-server.lls-demo.svc.cluster.local:8080/mcp
-      - toolgroup_id: mcp::slack
+      - toolgroup_id: mcp::rocketchat
         provider_id: model-context-protocol
         mcp_endpoint:
-          uri: http://slack-mcp-server.lls-demo.svc.cluster.local/mcp
+          uri: http://rocketchat-mcp.lls-demo.svc.cluster.local/mcp
     server:
       port: 8321

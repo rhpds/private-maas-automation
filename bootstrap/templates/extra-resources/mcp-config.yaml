@@ -9,8 +9,8 @@ data:
       "url": "http://ocp-mcp-server.lls-demo.svc.cluster.local:8080/mcp",
       "description": "A powerful and flexible Kubernetes Model Context Protocol (MCP) server implementation with support for Kubernetes and OpenShift."
     }
-  Slack-MCP-Server: |
+  RocketChat-MCP-Server: |
     {
-      "url": "http://slack-mcp-server.lls-demo.svc.cluster.local/mcp",
-      "description": "An MCP server for interacting with our workshop Slack instance."
+      "url": "http://rocketchat-mcp.lls-demo.svc.cluster.local/mcp",
+      "description": "An MCP server for interacting with the in-cluster Rocket.Chat instance. Enables AI agents to send messages, create channels, and interact with workshop participants."
     }

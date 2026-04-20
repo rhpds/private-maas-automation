@@ -1,14 +1,15 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: slack-mcp-server
+  name: {{ include "rocketchat-mcp.fullname" . }}
   labels:
-    {{- include "slack-mcp.labels" . | nindent 4 }}
+    {{- include "rocketchat-mcp.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   selector:
-    {{- include "slack-mcp.selectorLabels" . | nindent 4 }}
+    {{- include "rocketchat-mcp.selectorLabels" . | nindent 4 }}
   ports:
   - port: {{ .Values.service.port }}
     targetPort: {{ .Values.service.targetPort }}
     protocol: TCP
+    name: http

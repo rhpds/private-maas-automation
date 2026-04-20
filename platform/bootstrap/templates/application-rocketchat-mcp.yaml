@@ -1,0 +1,25 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rocketchat-mcp
+  namespace: openshift-gitops
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: {{ .Values.bootstrap.repoURL }}
+    targetRevision: {{ .Values.bootstrap.targetRevision }}
+    path: platform/rocketchat-mcp
+    helm:
+      valuesObject:
+        rocketchat:
+          url: {{ .Values.rocketchat.botUser.mcp.serviceUrl | quote }}
+          # Use secret created by rocketchat bot automation job
+          existingSecret: {{ .Values.rocketchat.botUser.mcp.secretName | quote }}
+  destination:
+    name: in-cluster
+    namespace: {{ .Values.rocketchat.botUser.mcp.namespace }}
+  syncPolicy:
+    {{- toYaml .Values.rocketchat.argocd.syncPolicy | nindent 4 }}
