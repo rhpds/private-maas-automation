@@ -7,10 +7,6 @@ metadata:
   name: {{ template "rocketchat.fullname" . }}-bot-setup
   labels:
     {{- include "rocketchat.labels" . | nindent 4 }}
-  annotations:
-    "helm.sh/hook": pre-install,pre-upgrade
-    "helm.sh/hook-weight": "1"
-    "helm.sh/hook-delete-policy": before-hook-creation
 ---
 # Role to create/update secrets in MCP namespace
 apiVersion: rbac.authorization.k8s.io/v1
@@ -20,10 +16,6 @@ metadata:
   namespace: {{ .Values.botUser.mcpNamespace }}
   labels:
     {{- include "rocketchat.labels" . | nindent 4 }}
-  annotations:
-    "helm.sh/hook": pre-install,pre-upgrade
-    "helm.sh/hook-weight": "1"
-    "helm.sh/hook-delete-policy": before-hook-creation
 rules:
 - apiGroups: [""]
   resources: ["secrets"]
@@ -37,10 +29,6 @@ metadata:
   namespace: {{ .Values.botUser.mcpNamespace }}
   labels:
     {{- include "rocketchat.labels" . | nindent 4 }}
-  annotations:
-    "helm.sh/hook": pre-install,pre-upgrade
-    "helm.sh/hook-weight": "2"
-    "helm.sh/hook-delete-policy": before-hook-creation
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -58,9 +46,8 @@ metadata:
   labels:
     {{- include "rocketchat.labels" . | nindent 4 }}
   annotations:
-    "helm.sh/hook": post-install,post-upgrade
-    "helm.sh/hook-weight": "5"
-    "helm.sh/hook-delete-policy": hook-succeeded,before-hook-creation
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
 spec:
   ttlSecondsAfterFinished: 300
   backoffLimit: 10
