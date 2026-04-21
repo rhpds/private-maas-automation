@@ -59,3 +59,14 @@ Get list of users - for single-user deployment, returns array with one user
 {{- toJson (list .Values.tenant.username) }}
 {{- end }}
 {{- end }}
+
+{{/*
+RocketChat secret name - use existing secret or generate default name
+*/}}
+{{- define "workspace.rocketchat.secretName" -}}
+{{- if .Values.rocketchat.existingSecret }}
+{{- .Values.rocketchat.existingSecret }}
+{{- else }}
+{{- printf "%s-rocketchat-credentials" .Values.tenant.username }}
+{{- end }}
+{{- end }}
