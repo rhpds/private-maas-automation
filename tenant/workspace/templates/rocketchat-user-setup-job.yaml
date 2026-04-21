@@ -91,6 +91,8 @@ spec:
           value: {{ .Values.rocketchat.outputSecretName | default "rocketchat-user-credentials" | quote }}
         - name: NAMESPACE
           value: {{ printf "%s-%s" .Values.namespacePrefix .Values.tenant.username | quote }}
+        - name: CREDENTIALS_SECRET_NAME
+          value: {{ include "workspace.rocketchat.secretName" . | quote }}
         command:
         - /bin/bash
         - -c
@@ -242,6 +244,19 @@ spec:
           else
             echo "ERROR: Failed to create secret"
             exit 1
+          fi
+
+          # Remove admin password from credentials secret for security
+          echo "Removing admin password from credentials secret..."
+          kubectl patch secret "$CREDENTIALS_SECRET_NAME" \
+            --namespace="$NAMESPACE" \
+            --type=json \
+            -p='[{"op": "remove", "path": "/data/admin-password"}]'
+
+          if [ $? -eq 0 ]; then
+            echo "✓ Admin password removed from secret (tenant password retained)"
+          else
+            echo "⚠ Warning: Could not remove admin password from secret"
           fi
 
           echo ""
