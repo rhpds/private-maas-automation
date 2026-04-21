@@ -30,7 +30,7 @@ data:
           api_token: ${env.VLLM_API_TOKEN_1:=fake}
           max_tokens: ${env.VLLM_MAX_TOKENS:=8192}
           tls_verify: ${env.VLLM_TLS_VERIFY:=false}
-          base_url: https://{{ .Values.model.name }}-kserve-workload-svc.llm.svc.cluster.local:8000/v1
+          base_url: https://{{ .Values.tenant.domain }}/llm/{{ .Values.model.name }}/v1
       vector_io:
       - provider_id: milvus
         provider_type: inline::milvus
