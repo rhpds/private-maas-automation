@@ -6,3 +6,16 @@ tenant:
   username: user1
   domain: apps.cluster.example.com
   tier: enterprise
+
+# RocketChat tenant user configuration
+rocketchat:
+  enabled: true
+  url: "http://rocketchat-rocketchat.rocketchat.svc.cluster.local"
+
+  # Admin credentials for user creation
+  adminUsername: "admin"
+  adminPassword: "changeme"
+
+  # Tenant user configuration
+  # Password should be unique per tenant - can be generated or set via override
+  tenantPassword: "changeme-tenant-password"
