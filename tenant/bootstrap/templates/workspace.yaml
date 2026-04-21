@@ -37,3 +37,7 @@ spec:
       group: workspace.devfile.io
       jsonPointers:
         - /spec/started
+    - kind: Secret
+      name: {{ .Values.tenant.username }}-rocketchat-credentials
+      jsonPointers:
+        - /data/admin-password
