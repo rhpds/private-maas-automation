@@ -128,6 +128,26 @@ spec:
           fi
           echo "✓ Admin login successful (User ID: $ADMIN_ID)"
 
+          # Disable 2FA email auto-opt-in to prevent TOTP errors during tenant login
+          # Uses password-based 2FA fallback (SHA256 hash of admin password)
+          echo "Disabling 2FA email auto-opt-in..."
+          PASSWORD_HASH=$(echo -n "$ADMIN_PASS" | sha256sum | cut -d' ' -f1)
+          for SETTING in Accounts_TwoFactorAuthentication_By_Email_Auto_Opt_In Accounts_TwoFactorAuthentication_By_Email_Enabled Accounts_TwoFactorAuthentication_Enabled; do
+            DISABLE_RESPONSE=$(curl -s -X POST "$RC_URL/api/v1/settings/$SETTING" \
+              -H "X-Auth-Token: $AUTH_TOKEN" \
+              -H "X-User-Id: $ADMIN_ID" \
+              -H "x-2fa-code: $PASSWORD_HASH" \
+              -H "x-2fa-method: password" \
+              -H "Content-Type: application/json" \
+              -d '{"value":false}')
+            SETTING_OK=$(echo "$DISABLE_RESPONSE" | grep -o '"success":true')
+            if [ -n "$SETTING_OK" ]; then
+              echo "  ✓ $SETTING disabled"
+            else
+              echo "  ⚠ $SETTING: $DISABLE_RESPONSE (may already be disabled)"
+            fi
+          done
+
           # Check if tenant user exists
           echo "Checking if tenant user exists: $TENANT_USERNAME..."
           USER_INFO_RESPONSE=$(curl -s -X GET "$RC_URL/api/v1/users.info?username=$TENANT_USERNAME" \
