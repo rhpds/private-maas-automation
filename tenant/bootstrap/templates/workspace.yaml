@@ -30,7 +30,7 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
-      - CreateNamespace=false
+      - CreateNamespace={{ .Values.bootstrap.createNamespace }}
       - RespectIgnoreDifferences=true
   ignoreDifferences:
     - kind: DevWorkspace

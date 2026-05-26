@@ -29,6 +29,7 @@ spec:
             bootstrap:
               repoURL: {{ .Values.bootstrap.repoURL }}
               targetRevision: {{ .Values.bootstrap.targetRevision }}
+              createNamespace: {{ .Values.user.createAutomationNamespace }}
             tenant:
               username: {{ `{{ user }}` }}
               password: {{ .Values.user.password | quote }}

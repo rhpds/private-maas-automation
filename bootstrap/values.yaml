@@ -4,6 +4,7 @@ bootstrap:
 
 user:
   count: 0
+  createAutomationNamespace: false
   password: openshift
   prefix: user
 

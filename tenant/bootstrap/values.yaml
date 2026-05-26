@@ -1,6 +1,7 @@
 bootstrap:
   repoURL: https://github.com/rhpds/private-maas-automation
   targetRevision: main
+  createNamespace: false
 
 tenant:
   username: user1
