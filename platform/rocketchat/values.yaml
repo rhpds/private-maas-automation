@@ -34,7 +34,7 @@ global:
 ## ref: https://hub.docker.com/r/rocketchat/rocket.chat/tags
 ##
 image:
-  repository: registry.rocket.chat/rocketchat/rocket.chat
+  repository: quay.io/jharmison/rocket.chat
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
