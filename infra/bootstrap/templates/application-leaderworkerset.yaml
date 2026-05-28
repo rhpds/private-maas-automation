@@ -2,10 +2,8 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: lws-operator
+  name: leaderworkerset
   namespace: openshift-gitops
-  annotations:
-    argocd.argoproj.io/sync-wave: "-1"
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
@@ -16,13 +14,7 @@ spec:
   sources:
   - path: charts/install-operators
     repoURL: https://github.com/jharmison-redhat/openshift-setup
-    targetRevision: ed8c06994034e591f5540e982f9d0b778504d4cc
-    helm:
-      valueFiles:
-        - $values/infra/lws-operator/values.yaml
-  - repoURL: {{ .Values.bootstrap.repoURL }}
-    targetRevision: {{ .Values.bootstrap.targetRevision }}
-    ref: values
+    targetRevision: da65e1611788615f969a684d90ee62bccb25c60d
   syncPolicy:
     automated:
       prune: true
