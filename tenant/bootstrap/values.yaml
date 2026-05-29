@@ -3,6 +3,8 @@ bootstrap:
   targetRevision: main
   createNamespace: false
 
+workspaceNamespacePrefix: wksp
+
 tenant:
   username: user1
   domain: apps.cluster.example.com

@@ -14,6 +14,7 @@ spec:
     path: tenant/workspace
     helm:
       valuesObject:
+        namespacePrefix: {{ .Values.workspaceNamespacePrefix }}
         tenant:
           username: {{ .Values.tenant.username }}
           domain: {{ .Values.tenant.domain }}
