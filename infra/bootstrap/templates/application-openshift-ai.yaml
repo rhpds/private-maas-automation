@@ -16,7 +16,7 @@ spec:
   sources:
   - path: charts/openshift-ai
     repoURL: https://github.com/jharmison-redhat/openshift-setup
-    targetRevision: a751243da77b5fc15dff12c6bba4f8990783a06d
+    targetRevision: cf20637d160f13e8f343070809d53b9cbb9e21ec
     helm:
       valueFiles:
         - $values/infra/openshift-ai/values.yaml

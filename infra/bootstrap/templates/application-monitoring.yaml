@@ -2,28 +2,20 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: leaderworkerset
+  name: monitoring
   namespace: openshift-gitops
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   destination:
     name: in-cluster
-    namespace: openshift-lws-operator
+    namespace: default
   project: default
   source:
-    path: charts/leaderworkerset
+    path: charts/monitoring
     repoURL: https://github.com/jharmison-redhat/openshift-setup
     targetRevision: cf20637d160f13e8f343070809d53b9cbb9e21ec
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
-    retry:
-      limit: 5
-      backoff:
-        duration: 30s
-        factor: 2
-        maxDuration: 5m

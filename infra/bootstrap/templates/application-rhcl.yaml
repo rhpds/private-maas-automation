@@ -2,7 +2,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: rhcl-operator
+  name: rhcl
   namespace: openshift-gitops
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -12,9 +12,9 @@ spec:
     name: in-cluster
   project: default
   source:
-    path: infra/rhcl-operator
-    repoURL: {{ .Values.bootstrap.repoURL }}
-    targetRevision: {{ .Values.bootstrap.targetRevision }}
+    path: charts/rhcl
+    repoURL: https://github.com/jharmison-redhat/openshift-setup
+    targetRevision: cf20637d160f13e8f343070809d53b9cbb9e21ec
   syncPolicy:
     automated:
       prune: true
