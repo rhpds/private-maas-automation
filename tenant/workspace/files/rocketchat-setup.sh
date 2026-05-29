@@ -149,19 +149,6 @@ else
   exit 1
 fi
 
-# Remove admin password from credentials secret for security
-echo "Removing admin password from credentials secret..."
-oc patch secret "${TENANT_USERNAME}-rocketchat-credentials" \
-  --namespace="$NAMESPACE" \
-  --type=json \
-  -p='[{"op": "remove", "path": "/data/admin-password"}]'
-
-if [ $? -eq 0 ]; then
-  echo "✓ Admin password removed from secret (tenant password retained)"
-else
-  echo "⚠ Warning: Could not remove admin password from secret"
-fi
-
 echo ""
 echo "═══════════════════════════════════════════"
 echo "  Tenant RocketChat User Setup Complete!"
