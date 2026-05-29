@@ -33,6 +33,12 @@ spec:
     syncOptions:
       - CreateNamespace={{ .Values.bootstrap.createNamespace }}
       - RespectIgnoreDifferences=true
+    {{- if .Values.bootstrap.createNamespace }}
+    managedNamespaceMetadata:
+      labels:
+        argocd.argoproj.io/managed-by: openshift-gitops
+        opendatahub.io/dashboard: "true"
+    {{- end }}
   ignoreDifferences:
     - kind: DevWorkspace
       group: workspace.devfile.io
