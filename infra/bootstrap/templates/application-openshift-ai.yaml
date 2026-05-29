@@ -20,6 +20,12 @@ spec:
     helm:
       valueFiles:
         - $values/infra/openshift-ai/values.yaml
+      valuesObject:
+        gateways:
+          openshiftAiInference:
+            hostname: inference.{{ .Values.deployer.domain }}
+          maasDefaultGateway:
+            hostname: maas.{{ .Values.deployer.domain }}
   - repoURL: {{ .Values.bootstrap.repoURL }}
     targetRevision: {{ .Values.bootstrap.targetRevision }}
     ref: values
