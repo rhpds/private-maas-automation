@@ -37,7 +37,6 @@ spec:
     managedNamespaceMetadata:
       labels:
         argocd.argoproj.io/managed-by: openshift-gitops
-        opendatahub.io/dashboard: "true"
     {{- end }}
   ignoreDifferences:
     - kind: DevWorkspace
