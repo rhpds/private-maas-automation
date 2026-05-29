@@ -17,11 +17,6 @@ spec:
     repoURL: {{ .Values.bootstrap.repoURL }}
     targetRevision: {{ .Values.bootstrap.targetRevision }}
     path: platform/models-as-a-service
-    helm:
-      valuesObject:
-        deployer:
-          domain: {{ .Values.deployer.domain }}
-          certificateName: cert-manager-ingress-cert
   syncPolicy:
     automated:
       prune: true
