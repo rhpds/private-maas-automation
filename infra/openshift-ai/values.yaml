@@ -1,7 +1,7 @@
 install-rhoai:
   operators:
     rhods-operator:
-      channel: stable-3.3
+      channel: stable-3.4
 
 dataScienceCluster:
   version: v2
@@ -46,5 +46,9 @@ hardwareProfiles:
       nvidia.com/gpu:
         max: 1
         displayName: NVIDIA L40s
+
 mlflow:
   create: false
+
+postgres-cluster:
+  enabled: true

@@ -1,6 +1,0 @@
-apiVersion: v2
-name: models
-description: Deployment of models supporting the LLMaaS workshop
-type: application
-version: 0.1.0
-appVersion: 0.1.0

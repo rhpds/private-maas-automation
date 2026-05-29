@@ -2,21 +2,27 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: models-as-a-service
+  name: maas-subscriptions
   namespace: openshift-gitops
   annotations:
-    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-wave: "1"
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   destination:
     name: in-cluster
-    namespace: redhat-ods-applications
+    namespace: models-as-a-service
   project: default
-  source:
-    repoURL: {{ .Values.bootstrap.repoURL }}
+  sources:
+  - path: charts/maas-subscriptions
+    repoURL: https://github.com/jharmison-redhat/openshift-setup
+    targetRevision: cf20637d160f13e8f343070809d53b9cbb9e21ec
+    helm:
+      valueFiles:
+        - $values/platform/maas-subscriptions/values.yaml
+  - repoURL: {{ .Values.bootstrap.repoURL }}
     targetRevision: {{ .Values.bootstrap.targetRevision }}
-    path: platform/models-as-a-service
+    ref: values
   syncPolicy:
     automated:
       prune: true

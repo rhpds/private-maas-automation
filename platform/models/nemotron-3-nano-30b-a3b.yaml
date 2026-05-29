@@ -1,0 +1,39 @@
+image:
+  repository: rhaii/vllm-cuda-rhel9
+  tag: 3.4.0
+
+displayNameOverride: NVIDIA Nemotron 3 Nano 30B A3B FP8
+
+model:
+  name: nemotron-3-nano-30b-a3b
+  uri: oci://quay.io/jharmison/models:redhatai--nvidia-nemotron-3-nano-30b-a3b-fp8-modelcar
+  args:
+    - --enable-force-include-usage
+    - --max-model-len=131072
+    - --enable-auto-tool-choice
+    - --tool-call-parser=qwen3_coder
+    - --trust-remote-code
+    - --reasoning-parser-plugin=/mnt/models/nano_v3_reasoning_parser.py
+    - --reasoning-parser=nano_v3
+
+resources:
+  limits:
+    cpu: "4"
+    memory: 24Gi
+    nvidia.com/gpu: "1"
+  requests:
+    cpu: "2"
+    memory: 16Gi
+    nvidia.com/gpu: "1"
+
+tolerations:
+  - effect: NoSchedule
+    key: nvidia.com/gpu
+    operator: Equal
+    value: l40-gpu
+
+hardwareProfile:
+  name: l40s
+
+maas:
+  enabled: true

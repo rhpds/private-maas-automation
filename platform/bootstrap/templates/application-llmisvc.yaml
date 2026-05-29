@@ -2,7 +2,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: models
+  name: nemotron-3-nano
   namespace: openshift-gitops
   annotations:
     argocd.argoproj.io/sync-wave: "1"
@@ -10,10 +10,16 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
-  source:
-    repoURL: {{ .Values.bootstrap.repoURL }}
+  sources:
+  - path: charts/llmisvc
+    repoURL: https://github.com/jharmison-redhat/openshift-setup
+    targetRevision: cf20637d160f13e8f343070809d53b9cbb9e21ec
+    helm:
+      valueFiles:
+        - $values/platform/models/nemotron-3-nano-30b-a3b.yaml
+  - repoURL: {{ .Values.bootstrap.repoURL }}
     targetRevision: {{ .Values.bootstrap.targetRevision }}
-    path: platform/models
+    ref: values
   destination:
     name: in-cluster
     namespace: llm
