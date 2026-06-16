@@ -1,5 +1,6 @@
 install-rhcl:
   operators:
     rhcl-operator:
+      namespace: kuadrant-system
       installPlanApproval: Manual
       startingCSV: rhcl-operator.v1.3.4
