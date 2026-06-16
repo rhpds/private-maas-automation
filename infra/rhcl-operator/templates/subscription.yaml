@@ -5,7 +5,8 @@ metadata:
   namespace: openshift-operators
 spec:
   channel: {{ .Values.channel }}
-  installPlanApproval: Automatic
+  installPlanApproval: Manual
   name: rhcl-operator
   source: redhat-operators
   sourceNamespace: openshift-marketplace
+  startingCSV: {{ .Values.startingCSV }}

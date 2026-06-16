@@ -1,0 +1,100 @@
+---
+# ConfigMap that sets 2Gi memory for the RHOAI-managed maas-default-gateway proxy pod.
+# Kuadrant's Wasm plugins (auth, rate-limit, token-rate-limit) require more than the
+# default 1Gi Istio assigns to Gateway API-managed proxy deployments.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: maas-default-gateway-config
+  namespace: openshift-ingress
+data:
+  deployment: |
+    spec:
+      template:
+        spec:
+          containers:
+          - name: istio-proxy
+            resources:
+              limits:
+                cpu: "2"
+                memory: 2Gi
+              requests:
+                cpu: 100m
+                memory: 256Mi
+---
+# Service account + RBAC for the gateway patch job below.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: patch-gateway-memory
+  namespace: openshift-gitops
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: patch-gateway-memory
+rules:
+- apiGroups: [gateway.networking.k8s.io]
+  resources: [gateways]
+  verbs: [get, list, patch, update]
+- apiGroups: [""]
+  resources: [configmaps]
+  verbs: [get, patch, update]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: patch-gateway-memory
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: patch-gateway-memory
+subjects:
+- kind: ServiceAccount
+  name: patch-gateway-memory
+  namespace: openshift-gitops
+---
+# PostSync job:
+# 1. Waits for RHOAI to create maas-default-gateway, then sets its
+#    infrastructure.parametersRef → maas-default-gateway-config (2Gi).
+# 2. Patches data-science-gateway-config (owned by RHOAI GatewayConfig) to add
+#    the deployment key with 2Gi memory — RHOAI only manages the service key.
+# Both gateways' proxy pods OOMKill at the default 1Gi when Kuadrant Wasm plugins load.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: patch-gateway-memory
+  namespace: openshift-gitops
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 10
+  template:
+    spec:
+      serviceAccountName: patch-gateway-memory
+      restartPolicy: OnFailure
+      containers:
+      - name: patch
+        image: image-registry.openshift-image-registry.svc:5000/openshift/tools:latest
+        imagePullPolicy: IfNotPresent
+        command:
+        - /bin/bash
+        - -c
+        - |
+          set -euo pipefail
+
+          echo "Waiting for maas-default-gateway to exist..."
+          until oc get gateway maas-default-gateway -n openshift-ingress &>/dev/null; do
+            echo "  waiting..."; sleep 15
+          done
+
+          echo "Patching maas-default-gateway infrastructure.parametersRef..."
+          oc patch gateway maas-default-gateway -n openshift-ingress --type=merge \
+            -p '{"spec":{"infrastructure":{"parametersRef":{"group":"","kind":"ConfigMap","name":"maas-default-gateway-config"}}}}'
+
+          echo "Patching data-science-gateway-config to add deployment memory limits..."
+          oc patch configmap data-science-gateway-config -n openshift-ingress --type=merge \
+            -p '{"data":{"deployment":"spec:\n  template:\n    spec:\n      containers:\n      - name: istio-proxy\n        resources:\n          limits:\n            cpu: \"2\"\n            memory: 2Gi\n          requests:\n            cpu: 100m\n            memory: 256Mi\n"}}'
+
+          echo "Done."
