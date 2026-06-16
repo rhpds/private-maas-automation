@@ -1,11 +1,12 @@
 ---
-# ConfigMap that sets 2Gi memory for the RHOAI-managed maas-default-gateway proxy pod.
-# Kuadrant's Wasm plugins (auth, rate-limit, token-rate-limit) require more than the
-# default 1Gi Istio assigns to Gateway API-managed proxy deployments.
+# Single shared ConfigMap for maas-default-gateway and openshift-ai-inference.
+# Kuadrant's auth/rate-limit/token-rate-limit Wasm plugins require more memory
+# than Istio's default 1Gi at gateway startup. 4Gi covers all three plugins.
+# Changing memory here takes effect on the next Istio Gateway reconciliation.
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: maas-default-gateway-config
+  name: maas-gateway-options
   namespace: openshift-ingress
 data:
   deployment: |
@@ -15,14 +16,14 @@ data:
           containers:
           - name: istio-proxy
             resources:
-              limits:
-                cpu: "2"
-                memory: 2Gi
               requests:
                 cpu: 100m
                 memory: 256Mi
+              limits:
+                cpu: "2"
+                memory: 4Gi
 ---
-# Service account + RBAC for the gateway patch job below.
+# RBAC for the PostSync job below.
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -54,12 +55,17 @@ subjects:
   name: patch-gateway-memory
   namespace: openshift-gitops
 ---
-# PostSync job:
-# 1. Waits for RHOAI to create maas-default-gateway, then sets its
-#    infrastructure.parametersRef → maas-default-gateway-config (2Gi).
-# 2. Patches data-science-gateway-config (owned by RHOAI GatewayConfig) to add
-#    the deployment key with 2Gi memory — RHOAI only manages the service key.
-# Both gateways' proxy pods OOMKill at the default 1Gi when Kuadrant Wasm plugins load.
+# PostSync job — runs after every sync:
+#
+# 1. maas-default-gateway + openshift-ai-inference: point infrastructure.parametersRef
+#    at the shared maas-gateway-options CM. Istio reads this as a strategic merge
+#    patch on the generated Deployment and sets the istio-proxy resource limits.
+#    This approach survives Istio reconciliation (unlike direct Deployment patches).
+#
+# 2. data-science-gateway: the RHOAI GatewayConfig operator owns this Gateway CR
+#    and reverts any parametersRef change back to data-science-gateway-config.
+#    Instead we patch the deployment key of that RHOAI-managed ConfigMap directly —
+#    RHOAI only manages the service key, so the deployment key persists.
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -84,17 +90,21 @@ spec:
         - |
           set -euo pipefail
 
-          echo "Waiting for maas-default-gateway to exist..."
-          until oc get gateway maas-default-gateway -n openshift-ingress &>/dev/null; do
-            echo "  waiting..."; sleep 15
+          echo "Waiting for gateways to exist..."
+          for gw in maas-default-gateway openshift-ai-inference data-science-gateway; do
+            until oc get gateway "$gw" -n openshift-ingress &>/dev/null; do
+              echo "  waiting for $gw..."; sleep 10
+            done
           done
 
-          echo "Patching maas-default-gateway infrastructure.parametersRef..."
-          oc patch gateway maas-default-gateway -n openshift-ingress --type=merge \
-            -p '{"spec":{"infrastructure":{"parametersRef":{"group":"","kind":"ConfigMap","name":"maas-default-gateway-config"}}}}'
+          echo "Pointing maas-default-gateway and openshift-ai-inference at shared ConfigMap..."
+          for gw in maas-default-gateway openshift-ai-inference; do
+            oc patch gateway "$gw" -n openshift-ingress --type=merge -p \
+              '{"spec":{"infrastructure":{"parametersRef":{"group":"","kind":"ConfigMap","name":"maas-gateway-options"}}}}'
+          done
 
-          echo "Patching data-science-gateway-config to add deployment memory limits..."
-          oc patch configmap data-science-gateway-config -n openshift-ingress --type=merge \
-            -p '{"data":{"deployment":"spec:\n  template:\n    spec:\n      containers:\n      - name: istio-proxy\n        resources:\n          limits:\n            cpu: \"2\"\n            memory: 2Gi\n          requests:\n            cpu: 100m\n            memory: 256Mi\n"}}'
+          echo "Patching data-science-gateway-config deployment key (RHOAI owns the gateway CR)..."
+          oc patch configmap data-science-gateway-config -n openshift-ingress --type=merge -p \
+            '{"data":{"deployment":"spec:\n  template:\n    spec:\n      containers:\n      - name: istio-proxy\n        resources:\n          requests:\n            cpu: 100m\n            memory: 256Mi\n          limits:\n            cpu: \"2\"\n            memory: 4Gi\n"}}'
 
           echo "Done."
