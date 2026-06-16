@@ -11,10 +11,16 @@ spec:
     namespace: kuadrant-system
     name: in-cluster
   project: default
-  source:
-    path: charts/rhcl
+  sources:
+  - path: charts/rhcl
     repoURL: https://github.com/jharmison-redhat/openshift-setup
     targetRevision: cf20637d160f13e8f343070809d53b9cbb9e21ec
+    helm:
+      valueFiles:
+        - $values/infra/rhcl/values.yaml
+  - repoURL: {{ .Values.bootstrap.repoURL }}
+    targetRevision: {{ .Values.bootstrap.targetRevision }}
+    ref: values
   syncPolicy:
     automated:
       prune: true

@@ -1,0 +1,5 @@
+install-rhcl:
+  operators:
+    rhcl-operator:
+      installPlanApproval: Manual
+      startingCSV: rhcl-operator.v1.3.4
