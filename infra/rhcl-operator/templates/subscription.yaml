@@ -10,3 +10,42 @@ spec:
   source: redhat-operators
   sourceNamespace: openshift-marketplace
   startingCSV: {{ .Values.startingCSV }}
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: authorino-operator
+  namespace: openshift-operators
+spec:
+  channel: {{ .Values.channel }}
+  installPlanApproval: Manual
+  name: authorino-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+  startingCSV: {{ .Values.authorinoStartingCSV }}
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: limitador-operator
+  namespace: openshift-operators
+spec:
+  channel: {{ .Values.channel }}
+  installPlanApproval: Manual
+  name: limitador-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+  startingCSV: {{ .Values.limitadorStartingCSV }}
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: dns-operator
+  namespace: openshift-operators
+spec:
+  channel: {{ .Values.channel }}
+  installPlanApproval: Manual
+  name: dns-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+  startingCSV: {{ .Values.dnsStartingCSV }}
