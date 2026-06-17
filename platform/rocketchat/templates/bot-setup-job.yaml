@@ -49,7 +49,7 @@ metadata:
     argocd.argoproj.io/hook: PostSync
     argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
 spec:
-  ttlSecondsAfterFinished: 300
+  ttlSecondsAfterFinished: 600
   backoffLimit: 10
   template:
     metadata:
@@ -78,7 +78,7 @@ spec:
 
           # Wait for Rocket.Chat to be ready
           echo "Waiting for Rocket.Chat to be ready..."
-          MAX_RETRIES=60
+          MAX_RETRIES=180
           RETRY_COUNT=0
           until curl -sf "$RC_URL/api/info" > /dev/null 2>&1; do
             RETRY_COUNT=$((RETRY_COUNT+1))
@@ -86,8 +86,8 @@ spec:
               echo "ERROR: Rocket.Chat did not become ready in time"
               exit 1
             fi
-            echo "Rocket.Chat not ready yet, waiting 5s... ($RETRY_COUNT/$MAX_RETRIES)"
-            sleep 5
+            echo "Rocket.Chat not ready yet, waiting 10s... ($RETRY_COUNT/$MAX_RETRIES)"
+            sleep 10
           done
           echo "✓ Rocket.Chat is ready!"
 
