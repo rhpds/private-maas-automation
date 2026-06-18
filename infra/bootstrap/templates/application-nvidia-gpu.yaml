@@ -14,7 +14,7 @@ spec:
   source:
     path: charts/nvidia-gpu-enablement
     repoURL: https://github.com/jharmison-redhat/openshift-setup
-    targetRevision: cf20637d160f13e8f343070809d53b9cbb9e21ec
+    targetRevision: 44eb40ab957b99a3cc73a856d6116bf12900ac12
   syncPolicy:
     automated:
       prune: true
