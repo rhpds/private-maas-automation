@@ -1,0 +1,4 @@
+gatewayClasses:
+  openshift-default: {}
+
+gateways: {}

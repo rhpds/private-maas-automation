@@ -1,0 +1,31 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gateway-api
+  namespace: openshift-gitops
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    namespace: openshift-ingress
+    name: in-cluster
+  project: default
+  sources:
+  - path: charts/gateway-api
+    repoURL: https://github.com/jharmison-redhat/openshift-setup
+    targetRevision: 44eb40ab957b99a3cc73a856d6116bf12900ac12
+    helm:
+      valueFiles:
+        - $values/infra/gateway-api/values.yaml
+  - repoURL: {{ .Values.bootstrap.repoURL }}
+    targetRevision: {{ .Values.bootstrap.targetRevision }}
+    ref: values
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
