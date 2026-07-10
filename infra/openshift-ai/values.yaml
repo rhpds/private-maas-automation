@@ -1,7 +1,7 @@
 install-rhoai:
   operators:
     rhods-operator:
-      channel: stable-3.3
+      channel: stable-3.4
 
 dataScienceCluster:
   version: v2
