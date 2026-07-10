@@ -53,6 +53,10 @@ postgres-cluster:
   enabled: true
   nameOverride: maas
   namespace: maas-db
+  certificate:
+    enabled: false
+  backups:
+    enabled: false
   databases:
     - name: maas
       user: maas
