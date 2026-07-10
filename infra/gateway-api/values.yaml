@@ -1,4 +1,4 @@
 gatewayClasses:
   openshift-default: {}
 
-gateways: {}
+gateways: null

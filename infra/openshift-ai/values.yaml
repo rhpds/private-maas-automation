@@ -49,6 +49,14 @@ hardwareProfiles:
 mlflow:
   create: false
 
+postgres-cluster:
+  enabled: true
+  nameOverride: maas
+  namespace: maas-db
+  databases:
+    - name: maas
+      user: maas
+
 mcpServers:
   Kubernetes-MCP-Server:
     url: http://ocp-mcp-server.lls-demo.svc.cluster.local:8080/mcp
