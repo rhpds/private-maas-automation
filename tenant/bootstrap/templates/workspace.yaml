@@ -14,6 +14,7 @@ spec:
     path: tenant/workspace
     helm:
       valuesObject:
+        namespacePrefix: {{ .Values.workspaceNamespacePrefix }}
         tenant:
           username: {{ .Values.tenant.username }}
           domain: {{ .Values.tenant.domain }}
@@ -30,8 +31,13 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
-      - CreateNamespace=false
+      - CreateNamespace={{ .Values.bootstrap.createNamespace }}
       - RespectIgnoreDifferences=true
+    {{- if .Values.bootstrap.createNamespace }}
+    managedNamespaceMetadata:
+      labels:
+        argocd.argoproj.io/managed-by: openshift-gitops
+    {{- end }}
   ignoreDifferences:
     - kind: DevWorkspace
       group: workspace.devfile.io

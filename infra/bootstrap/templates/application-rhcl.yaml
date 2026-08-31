@@ -2,24 +2,22 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: openshift-ai-operator
+  name: rhcl
   namespace: openshift-gitops
-  annotations:
-    argocd.argoproj.io/sync-wave: "-1"
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   destination:
+    namespace: kuadrant-system
     name: in-cluster
-    namespace: redhat-ods-operator
   project: default
   sources:
-  - path: charts/install-operators
+  - path: charts/rhcl
     repoURL: https://github.com/jharmison-redhat/openshift-setup
-    targetRevision: ce78b89b3e1eee5554aa1198f72f8ff50e5adcd8
+    targetRevision: 44eb40ab957b99a3cc73a856d6116bf12900ac12
     helm:
       valueFiles:
-        - $values/infra/openshift-ai-operator/values.yaml
+        - $values/infra/rhcl/values.yaml
   - repoURL: {{ .Values.bootstrap.repoURL }}
     targetRevision: {{ .Values.bootstrap.targetRevision }}
     ref: values
@@ -30,7 +28,5 @@ spec:
     syncOptions:
       - CreateNamespace=true
     managedNamespaceMetadata:
-      annotations:
-        openshift.io/cluster-monitoring: 'true'
       labels:
         argocd.argoproj.io/managed-by: openshift-gitops

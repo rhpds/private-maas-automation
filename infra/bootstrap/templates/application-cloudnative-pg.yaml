@@ -2,7 +2,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: cluster-monitoring
+  name: cloudnative-pg
   namespace: openshift-gitops
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -12,10 +12,16 @@ spec:
     namespace: default
   project: default
   source:
-    path: infra/cluster-monitoring
-    repoURL: {{ .Values.bootstrap.repoURL }}
-    targetRevision: {{ .Values.bootstrap.targetRevision }}
+    path: charts/cloudnative-pg
+    repoURL: https://github.com/jharmison-redhat/openshift-setup
+    targetRevision: 44eb40ab957b99a3cc73a856d6116bf12900ac12
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+    retry:
+      limit: 10
+      backoff:
+        duration: 10s
+        factor: 3
+        maxDuration: 30m

@@ -1,28 +1,63 @@
+install-rhoai:
+  operators:
+    rhods-operator:
+      channel: stable-3.4
+
 dataScienceCluster:
   version: v2
   components:
+    aipipelines:
+      managementState: Removed
+    feastoperator:
+      managementState: Removed
     kserve:
-      managementState: Managed
-      nim:
-        managementState: Managed
       modelsAsService:
         managementState: Managed
-      rawDeploymentServiceConfig: Headed
-    llamastackoperator:
-      managementState: Managed
+    ray:
+      managementState: Removed
+    trainer:
+      managementState: Removed
     trainingoperator:
       managementState: Removed
 
-dataScienceClusterInitialization: null
-
 dashboardConfig:
-  disableModelRegistry: false
-  disableModelCatalog: false
   disableKServeMetrics: false
   genAiStudio: true
   modelAsService: true
-  disableLMEval: false
 
-modelServerSizes: null
+hardwareProfiles:
+  l40s:
+    node:
+      tolerations:
+        - key: nvidia.com/gpu
+          operator: Equal
+          value: l40-gpu
+          effect: NoSchedule
+    displayName: NVIDIA L40s
+    cpu:
+      min: 1
+      max: 6
+      default: 2
+    memory:
+      min: 2Gi
+      max: 48Gi
+      default: 16Gi
+    gpu:
+      nvidia.com/gpu:
+        max: 1
+        displayName: NVIDIA L40s
+mlflow:
+  create: false
 
-notebookSizes: null
+mcpServers:
+  Kubernetes-MCP-Server:
+    url: http://ocp-mcp-server.lls-demo.svc.cluster.local:8080/mcp
+    description: >-
+      A powerful and flexible Kubernetes Model Context Protocol (MCP) server
+      implementation with support for Kubernetes and OpenShift.
+  RocketChat-MCP-Server:
+    url: http://rocketchat-mcp.lls-demo.svc.cluster.local/mcp
+    description: >-
+      An MCP server for interacting with the in-cluster Rocket.Chat instance.
+      Enables AI agents to send messages, create channels, and interact with workshop
+      participants.

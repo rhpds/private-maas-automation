@@ -1,0 +1,48 @@
+{{- if ne (int .Values.user.count) (int 0) }}
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: tenant-users
+  namespace: openshift-gitops
+spec:
+  generators:
+    - list:
+        elements:
+        {{- $userCount := int .Values.user.count }}
+        {{- range $index := until $userCount }}
+          - user: {{ $.Values.user.prefix }}{{ add $index 1}}
+        {{- end }}
+  template:
+    metadata:
+      name: tenant-{{ `{{ user }}` }}
+      namespace: openshift-gitops
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: default
+      source:
+        repoURL: {{ .Values.bootstrap.repoURL }}
+        targetRevision: {{ .Values.bootstrap.targetRevision }}
+        path: tenant/bootstrap
+        helm:
+          values: |
+            bootstrap:
+              repoURL: {{ .Values.bootstrap.repoURL }}
+              targetRevision: {{ .Values.bootstrap.targetRevision }}
+              createNamespace: {{ .Values.user.createAutomationNamespace }}
+            tenant:
+              username: {{ `{{ user }}` }}
+              password: {{ .Values.user.password | quote }}
+              domain: {{ .Values.deployer.domain }}
+            rocketchat:
+              adminUsername: {{ .Values.rocketchat.adminUsername }}
+              adminPassword: {{ .Values.rocketchat.adminPassword | quote }}
+              adminEmail: {{ .Values.rocketchat.adminEmail }}
+              tenantPassword: {{ .Values.user.password | quote }}
+      destination:
+        name: in-cluster
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+{{- end }}

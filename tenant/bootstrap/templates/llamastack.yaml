@@ -19,7 +19,7 @@ spec:
           domain: {{ .Values.tenant.domain }}
   destination:
     name: in-cluster
-    namespace: {{ .Values.tenant.username }}
+    namespace: {{ .Values.workspaceNamespacePrefix }}-{{ .Values.tenant.username }}
   syncPolicy:
     automated:
       prune: true

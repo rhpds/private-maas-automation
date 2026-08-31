@@ -2,7 +2,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: lws-operator
+  name: gateway-api
   namespace: openshift-gitops
   annotations:
     argocd.argoproj.io/sync-wave: "-1"
@@ -10,16 +10,16 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
 spec:
   destination:
+    namespace: openshift-ingress
     name: in-cluster
-    namespace: openshift-lws-operator
   project: default
   sources:
-  - path: charts/install-operators
+  - path: charts/gateway-api
     repoURL: https://github.com/jharmison-redhat/openshift-setup
-    targetRevision: ed8c06994034e591f5540e982f9d0b778504d4cc
+    targetRevision: 44eb40ab957b99a3cc73a856d6116bf12900ac12
     helm:
       valueFiles:
-        - $values/infra/lws-operator/values.yaml
+        - $values/infra/gateway-api/values.yaml
   - repoURL: {{ .Values.bootstrap.repoURL }}
     targetRevision: {{ .Values.bootstrap.targetRevision }}
     ref: values
@@ -29,9 +29,3 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-    retry:
-      limit: 5
-      backoff:
-        duration: 30s
-        factor: 2
-        maxDuration: 5m

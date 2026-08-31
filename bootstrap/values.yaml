@@ -2,6 +2,12 @@ bootstrap:
   repoURL: https://github.com/rhpds/private-maas-automation
   targetRevision: main
 
+user:
+  count: 0
+  createAutomationNamespace: false
+  password: openshift
+  prefix: user
+
 deployer:
   domain: apps.cluster.example.com
 

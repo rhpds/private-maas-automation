@@ -16,10 +16,20 @@ spec:
   sources:
   - path: charts/openshift-ai
     repoURL: https://github.com/jharmison-redhat/openshift-setup
-    targetRevision: a751243da77b5fc15dff12c6bba4f8990783a06d
+    targetRevision: defdb66654b8a072a17a25eef819bbb5b6ad8133
     helm:
       valueFiles:
         - $values/infra/openshift-ai/values.yaml
+      valuesObject:
+        gateways:
+          openshiftAiInference:
+            hostname: inference.{{ .Values.deployer.domain }}
+            certificate:
+              clusterIssuer: letsencrypt-production-aws-fallback
+          maasDefaultGateway:
+            hostname: maas.{{ .Values.deployer.domain }}
+            certificate:
+              clusterIssuer: letsencrypt-production-aws-fallback
   - repoURL: {{ .Values.bootstrap.repoURL }}
     targetRevision: {{ .Values.bootstrap.targetRevision }}
     ref: values
