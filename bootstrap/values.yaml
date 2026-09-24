@@ -1,6 +1,6 @@
 bootstrap:
   repoURL: https://github.com/rhpds/private-maas-automation
-  targetRevision: main
+  targetRevision: feat/maas-3.5.1-port
 
 user:
   count: 0

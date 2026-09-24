@@ -18,7 +18,7 @@ devworkspace:
   components:
     - name: universal-developer-image
       container:
-        image: registry.redhat.io/devspaces/udi-rhel9:3.25.0
+        image: registry.redhat.io/devspaces/udi-rhel9:3.30.0
         sourceMapping: /projects
         # Note: CHE_DASHBOARD_URL will be set dynamically by the template based on tenant.domain
 
