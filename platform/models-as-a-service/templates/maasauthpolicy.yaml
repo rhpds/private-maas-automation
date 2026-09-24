@@ -1,0 +1,15 @@
+{{- range $tier, $_ := dict "free" 10 "premium" 20 "enterprise" 30 }}
+---
+apiVersion: maas.opendatahub.io/v1alpha1
+kind: MaaSAuthPolicy
+metadata:
+  name: maas-{{ $tier }}-subscription-policy
+  namespace: models-as-a-service
+spec:
+  modelRefs:
+    - name: {{ $.Values.modelName | default "nemotron-3-nano-30b-a3b" }}
+      namespace: llm
+  subjects:
+    groups:
+      - tier-{{ $tier }}-users
+{{- end }}

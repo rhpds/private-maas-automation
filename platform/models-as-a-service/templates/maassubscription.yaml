@@ -1,0 +1,18 @@
+{{- range $tier, $priority := dict "free" 10 "premium" 20 "enterprise" 30 }}
+---
+apiVersion: maas.opendatahub.io/v1alpha1
+kind: MaaSSubscription
+metadata:
+  name: maas-{{ $tier }}-subscription
+  namespace: models-as-a-service
+spec:
+  owner:
+    groups:
+      - tier-{{ $tier }}-users
+  modelRefs:
+    - name: {{ $.Values.modelName | default "nemotron-3-nano-30b-a3b" }}
+      namespace: llm
+      tokenRateLimits:
+        {{- toYaml (index $.Values.tiers $tier).tokenRateLimits | nindent 8 }}
+  priority: {{ $priority }}
+{{- end }}

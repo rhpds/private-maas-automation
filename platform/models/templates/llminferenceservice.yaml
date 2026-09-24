@@ -4,7 +4,6 @@ apiVersion: serving.kserve.io/v1alpha1
 kind: LLMInferenceService
 metadata:
   annotations:
-    alpha.maas.opendatahub.io/tiers: {{ toJson (.tiers | default $.Values.defaultModelTiers) | quote }}
     openshift.io/display-name: {{ .displayName }}
     opendatahub.io/model-type: generative
     security.opendatahub.io/enable-auth: "true"
@@ -12,7 +11,7 @@ metadata:
     opendatahub.io/dashboard: "true"
     opendatahub.io/genai-asset: "true"
   name: {{ .name }}
-  namespace: {{ $.Values.modelsNamespace }}
+  namespace: llm
 spec:
   model:
     name: {{ .name }}
@@ -81,4 +80,17 @@ spec:
           medium: Memory
           sizeLimit: 2Gi
         name: shm
+---
+apiVersion: maas.opendatahub.io/v1alpha1
+kind: MaaSModelRef
+metadata:
+  name: {{ .name }}
+  namespace: llm
+  labels:
+    opendatahub.io/dashboard: "true"
+    opendatahub.io/genai-asset: "true"
+spec:
+  modelRef:
+    kind: LLMInferenceService
+    name: {{ .name }}
 {{- end }}

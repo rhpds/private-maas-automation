@@ -2,7 +2,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: models-as-a-service
+  name: rhoai-extras
   namespace: openshift-gitops
   annotations:
     argocd.argoproj.io/sync-wave: "2"
@@ -16,20 +16,13 @@ spec:
   source:
     repoURL: {{ .Values.bootstrap.repoURL }}
     targetRevision: {{ .Values.bootstrap.targetRevision }}
-    path: platform/models-as-a-service
+    path: platform/rhoai-extras
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
-    syncOptions:
-      - RespectIgnoreDifferences=true
     retry:
       limit: 5
       backoff:
         duration: 30s
         factor: 2
-  ignoreDifferences:
-    - kind: Group
-      group: user.openshift.io
-      jsonPointers:
-        - /users

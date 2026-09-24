@@ -1,28 +1,15 @@
-global:
-  toolsImage: image-registry.openshift-image-registry.svc:5000/openshift/tools:latest
-
 tiers:
   free:
-    requestRates:
-      - limit: 5
-        window: 2m
-    tokenRates:
+    tokenRateLimits:
       - limit: 100
         window: 1m
   premium:
-    requestRates:
-      - limit: 20
-        window: 2m
-    tokenRates:
+    tokenRateLimits:
       - limit: 10000
         window: 1m
   enterprise:
-    requestRates:
-      - limit: 50
-        window: 2m
-    tokenRates:
+    tokenRateLimits:
       - limit: 20000
         window: 1m
     users:
       - admin
-
