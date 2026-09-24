@@ -8,7 +8,7 @@ workspaceNamespacePrefix: wksp
 tenant:
   username: user1
   domain: apps.cluster.example.com
-  tier: enterprise
+  group: premium-users
 
 # RocketChat tenant user configuration
 rocketchat:

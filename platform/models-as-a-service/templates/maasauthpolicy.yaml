@@ -1,9 +1,9 @@
-{{- range $tier, $_ := dict "free" 10 "premium" 20 "enterprise" 30 }}
+{{- range $plan, $_ := dict "free" 10 "premium" 20 }}
 ---
 apiVersion: maas.opendatahub.io/v1alpha1
 kind: MaaSAuthPolicy
 metadata:
-  name: maas-{{ $tier }}-subscription-policy
+  name: maas-{{ $plan }}-subscription-policy
   namespace: models-as-a-service
 spec:
   modelRefs:
@@ -11,5 +11,7 @@ spec:
       namespace: llm
   subjects:
     groups:
-      - name: tier-{{ $tier }}-users
+      {{- range (index $.Values.plans $plan).ownerGroups }}
+      - name: {{ . }}
+      {{- end }}
 {{- end }}

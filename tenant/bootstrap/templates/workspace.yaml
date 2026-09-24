@@ -18,7 +18,7 @@ spec:
         tenant:
           username: {{ .Values.tenant.username }}
           domain: {{ .Values.tenant.domain }}
-          tier: {{ .Values.tenant.tier }}
+          group: {{ .Values.tenant.group }}
         rocketchat:
           adminPassword: {{ .Values.rocketchat.adminPassword | quote }}
           # Use tenant password for RocketChat login

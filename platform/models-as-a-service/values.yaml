@@ -1,15 +1,17 @@
-tiers:
+plans:
   free:
-    tokenRateLimits:
-      - limit: 100
-        window: 1m
-  premium:
+    ownerGroups:
+      - system:authenticated
     tokenRateLimits:
       - limit: 10000
         window: 1m
-  enterprise:
+      - limit: 100
+        window: 1s
+  premium:
+    ownerGroups:
+      - premium-users
     tokenRateLimits:
       - limit: 20000
         window: 1m
-    users:
-      - admin
+      - limit: 1000
+        window: 1s
