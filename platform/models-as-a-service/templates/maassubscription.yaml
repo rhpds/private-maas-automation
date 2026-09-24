@@ -8,7 +8,7 @@ metadata:
 spec:
   owner:
     groups:
-      - tier-{{ $tier }}-users
+      - name: tier-{{ $tier }}-users
   modelRefs:
     - name: {{ $.Values.modelName | default "nemotron-3-nano-30b-a3b" }}
       namespace: llm

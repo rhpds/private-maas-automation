@@ -25,11 +25,11 @@ spec:
           openshiftAiInference:
             hostname: inference.{{ .Values.deployer.domain }}
             certificate:
-              clusterIssuer: letsencrypt-production-aws-fallback
+              clusterIssuer: letsencrypt-production-aws
           maasDefaultGateway:
             hostname: maas.{{ .Values.deployer.domain }}
             certificate:
-              clusterIssuer: letsencrypt-production-aws-fallback
+              clusterIssuer: letsencrypt-production-aws
   - repoURL: {{ .Values.bootstrap.repoURL }}
     targetRevision: {{ .Values.bootstrap.targetRevision }}
     ref: values

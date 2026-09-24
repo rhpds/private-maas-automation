@@ -11,5 +11,5 @@ spec:
       namespace: llm
   subjects:
     groups:
-      - tier-{{ $tier }}-users
+      - name: tier-{{ $tier }}-users
 {{- end }}
