@@ -3,4 +3,4 @@ install-rhcl:
     rhcl-operator:
       namespace: kuadrant-system
       installPlanApproval: Manual
-      startingCSV: rhcl-operator.v1.3.4
+      startingCSV: rhcl-operator.v1.4.3

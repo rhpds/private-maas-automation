@@ -1,7 +1,9 @@
 install-rhoai:
   operators:
     rhods-operator:
-      channel: stable-3.4
+      channel: stable-3.5
+      installPlanApproval: Manual
+      startingCSV: rhods-operator.3.5.1
 
 dataScienceCluster:
   version: v2
@@ -10,15 +12,26 @@ dataScienceCluster:
       managementState: Removed
     feastoperator:
       managementState: Removed
-    kserve:
-      modelsAsService:
+    aigateway:
+      managementState: Managed
+      modelsAsAService:
         managementState: Managed
+    ogx:
+      managementState: Managed
     ray:
       managementState: Removed
     trainer:
       managementState: Removed
     trainingoperator:
       managementState: Removed
+
+postgres-cluster:
+  enabled: true
+  nameOverride: maas
+  namespace: maas-db
+  databases:
+    - name: maas
+      user: maas
 
 dashboardConfig:
   disableKServeMetrics: false
