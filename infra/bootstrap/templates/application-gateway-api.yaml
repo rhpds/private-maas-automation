@@ -16,7 +16,7 @@ spec:
   sources:
   - path: charts/gateway-api
     repoURL: https://github.com/jharmison-redhat/openshift-setup
-    targetRevision: 44eb40ab957b99a3cc73a856d6116bf12900ac12
+    targetRevision: f6beed4b481d5345397fdbd8f6749c846181ee1e
     helm:
       valueFiles:
         - $values/infra/gateway-api/values.yaml

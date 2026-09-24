@@ -2,25 +2,36 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: leaderworkerset
+  name: cluster-observability
   namespace: openshift-gitops
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   destination:
+    namespace: openshift-cluster-observability-operator
     name: in-cluster
-    namespace: openshift-lws-operator
   project: default
-  source:
-    path: charts/leaderworkerset
+  sources:
+  - path: charts/install-operators
     repoURL: https://github.com/jharmison-redhat/openshift-setup
     targetRevision: f6beed4b481d5345397fdbd8f6749c846181ee1e
+    helm:
+      valueFiles:
+        - $values/infra/cluster-observability/values.yaml
+  - repoURL: {{ .Values.bootstrap.repoURL }}
+    targetRevision: {{ .Values.bootstrap.targetRevision }}
+    ref: values
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        argocd.argoproj.io/managed-by: openshift-gitops
     retry:
       limit: 5
       backoff:
