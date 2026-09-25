@@ -14,7 +14,7 @@ spec:
   source:
     path: charts/leaderworkerset
     repoURL: https://github.com/jharmison-redhat/openshift-setup
-    targetRevision: f6401ca17fa84f9c8013feabd8f970d944330a4d
+    targetRevision: 2f0b50f4eed0b69887ac1786cfe5cd750892599a
   syncPolicy:
     automated:
       prune: true

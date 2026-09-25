@@ -28,7 +28,6 @@ dataScienceCluster:
 postgres-cluster:
   enabled: true
   nameOverride: maas
-  namespace: maas-db
   databases:
     - name: maas
       user: maas
