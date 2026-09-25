@@ -2,12 +2,6 @@ bootstrap:
   repoURL: https://github.com/rhpds/private-maas-automation
   targetRevision: feat/maas-3.5.1-port
 
-user:
-  count: 0
-  createAutomationNamespace: false
-  password: openshift
-  prefix: user
-
 deployer:
   domain: apps.cluster.example.com
 
