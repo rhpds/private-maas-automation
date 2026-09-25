@@ -33,12 +33,20 @@ spec:
   - repoURL: {{ .Values.bootstrap.repoURL }}
     targetRevision: {{ .Values.bootstrap.targetRevision }}
     ref: values
+  ignoreDifferences:
+  - group: postgresql.cnpg.io
+    kind: Cluster
+    jqPathExpressions:
+      - .spec.managed.roles[].connectionLimit
+      - .spec.managed.roles[].ensure
+      - .spec.managed.roles[].inherit
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - SkipDryRunOnMissingResource=true
+      - RespectIgnoreDifferences=true
       - ServerSideApply=true
     retry:
       limit: 10
