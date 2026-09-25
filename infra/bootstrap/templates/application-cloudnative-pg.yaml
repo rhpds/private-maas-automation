@@ -14,7 +14,7 @@ spec:
   source:
     path: charts/cloudnative-pg
     repoURL: https://github.com/jharmison-redhat/openshift-setup
-    targetRevision: 2f0b50f4eed0b69887ac1786cfe5cd750892599a
+    targetRevision: 7891fca8c78448a093889d4e186cbcb5034faba8
   syncPolicy:
     automated:
       prune: true
