@@ -3,15 +3,15 @@ plans:
     ownerGroups:
       - system:authenticated
     tokenRateLimits:
-      - limit: 10000
+      - limit: 20000
         window: 1m
-      - limit: 100
+      - limit: 1000
         window: 1s
   premium:
     ownerGroups:
       - premium-users
     tokenRateLimits:
-      - limit: 20000
+      - limit: 1000000
         window: 1m
-      - limit: 1000
+      - limit: 20000
         window: 1s
