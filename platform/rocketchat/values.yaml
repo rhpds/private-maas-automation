@@ -43,6 +43,18 @@ imagePullSecrets: []
 ## set it to a domain pointing to your loadbalancer
 # host:
 
+## Rocket.Chat settings overrides — rendered as OVERWRITE_SETTING_* env in chat-deployment.yaml.
+## Consolidated here (chart defaults) so they survive chart moves; the bootstrap app-of-apps
+## passes only ADMIN_* creds via extraEnv.
+settings:
+  skipSetupWizard: true            # OVERWRITE_SETTING_Show_Setup_Wizard (completed)
+  allowPublicRegistration: true    # OVERWRITE_SETTING_Accounts_RegistrationForm (Public)
+  manuallyApproveNewUsers: false   # OVERWRITE_SETTING_Accounts_ManuallyApproveNewUsers
+  twoFactorAuthEnabled: false          # OVERWRITE_SETTING_Accounts_TwoFactorAuthentication_Enabled
+  twoFactorAuthEmailEnabled: false     # OVERWRITE_SETTING_Accounts_TwoFactorAuthentication_By_Email_Enabled
+  twoFactorAuthEmailAutoOptIn: false   # OVERWRITE_SETTING_Accounts_TwoFactorAuthentication_By_Email_Auto_Opt_In
+  registerServer: false            # OVERWRITE_SETTING_Register_Server (workspace unregistered; no licensing push)
+
 replicaCount: 1
 minAvailable: 1
 
@@ -364,7 +376,7 @@ podDisruptionBudget:
 ## Deploy as microservices?
 # Monolithic architecture, by default
 microservices:
-  enabled: true
+  enabled: false
 
   logLevel: warn
 

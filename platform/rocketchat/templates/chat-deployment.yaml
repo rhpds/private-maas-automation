@@ -137,6 +137,21 @@ spec:
         - name: RETRY_ENABLED
           value: 'yes'
         {{- end }} # end of microservices envvar. options
+        # Settings overrides (consolidated in chart default values.yaml)
+        - name: OVERWRITE_SETTING_Show_Setup_Wizard
+          value: {{ .Values.settings.skipSetupWizard | ternary "completed" "pending" | quote }}
+        - name: OVERWRITE_SETTING_Accounts_RegistrationForm
+          value: {{ .Values.settings.allowPublicRegistration | ternary "Public" "Disabled" | quote }}
+        - name: OVERWRITE_SETTING_Accounts_ManuallyApproveNewUsers
+          value: {{ .Values.settings.manuallyApproveNewUsers | quote }}
+        - name: OVERWRITE_SETTING_Accounts_TwoFactorAuthentication_Enabled
+          value: {{ .Values.settings.twoFactorAuthEnabled | quote }}
+        - name: OVERWRITE_SETTING_Accounts_TwoFactorAuthentication_By_Email_Enabled
+          value: {{ .Values.settings.twoFactorAuthEmailEnabled | quote }}
+        - name: OVERWRITE_SETTING_Accounts_TwoFactorAuthentication_By_Email_Auto_Opt_In
+          value: {{ .Values.settings.twoFactorAuthEmailAutoOptIn | quote }}
+        - name: OVERWRITE_SETTING_Register_Server
+          value: {{ .Values.settings.registerServer | quote }}
         {{- with .Values.extraEnv }}
           {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 8 }}
         {{- end }}
