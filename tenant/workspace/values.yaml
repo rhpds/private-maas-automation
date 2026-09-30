@@ -15,6 +15,9 @@ playground:
   name: lsd-genai-playground
   maxTokens: "16384"
   # maasBaseUrl defaults to https://maas.<tenant.domain>/v1
+  # In-namespace pgvector DB password (ClusterIP only, no route)
+  # ponytail: fixed default, per-tenant override if isolation matters
+  pgvectorPassword: "vectoruser-password"
 
 # DevWorkspace configuration
 devworkspace:

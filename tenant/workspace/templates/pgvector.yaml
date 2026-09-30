@@ -1,0 +1,157 @@
+{{- if .Values.playground.enabled }}
+---
+kind: Secret
+apiVersion: v1
+metadata:
+  name: genai-pgvector-credentials
+  namespace: {{ .Values.namespacePrefix }}-{{ .Values.tenant.username }}
+  labels:
+    gen-ai.opendatahub.io/pgvector: "true"
+type: Opaque
+stringData:
+  password: {{ .Values.playground.pgvectorPassword | default "vectoruser-password" | quote }}
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: genai-pgvector-init
+  namespace: {{ .Values.namespacePrefix }}-{{ .Values.tenant.username }}
+  labels:
+    gen-ai.opendatahub.io/pgvector: "true"
+data:
+  enable-pgvector.sh: |
+    #!/bin/bash
+    psql -U postgres -d "${POSTGRESQL_DATABASE}" -c "CREATE EXTENSION IF NOT EXISTS vector;"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: genai-pgvector-storage
+  namespace: {{ .Values.namespacePrefix }}-{{ .Values.tenant.username }}
+  labels:
+    gen-ai.opendatahub.io/pgvector: "true"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: genai-pgvector
+  namespace: {{ .Values.namespacePrefix }}-{{ .Values.tenant.username }}
+  labels:
+    gen-ai.opendatahub.io/pgvector: "true"
+spec:
+  ports:
+    - name: postgresql
+      port: 5432
+      protocol: TCP
+      targetPort: 5432
+  selector:
+    app: genai-pgvector
+    gen-ai.opendatahub.io/pgvector: "true"
+  type: ClusterIP
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: genai-pgvector
+  namespace: {{ .Values.namespacePrefix }}-{{ .Values.tenant.username }}
+  labels:
+    gen-ai.opendatahub.io/pgvector: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: genai-pgvector
+      gen-ai.opendatahub.io/pgvector: "true"
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: genai-pgvector
+        gen-ai.opendatahub.io/pgvector: "true"
+    spec:
+      containers:
+        - name: postgresql
+          image: registry.redhat.io/rhel9/postgresql-16
+          imagePullPolicy: Always
+          env:
+            - name: POSTGRESQL_DATABASE
+              value: vectordb
+            - name: POSTGRESQL_USER
+              value: vectoruser
+            - name: POSTGRESQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: genai-pgvector-credentials
+          ports:
+            - containerPort: 5432
+              protocol: TCP
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - vectoruser
+                - -d
+                - vectordb
+            failureThreshold: 3
+            periodSeconds: 20
+            timeoutSeconds: 1
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - vectoruser
+                - -d
+                - vectordb
+            failureThreshold: 3
+            periodSeconds: 10
+            timeoutSeconds: 1
+          startupProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - vectoruser
+                - -d
+                - vectordb
+            failureThreshold: 18
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 250m
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
+          volumeMounts:
+            - mountPath: /var/lib/pgsql/data
+              name: pgdata
+            - mountPath: /opt/app-root/src/postgresql-start
+              name: init-scripts
+              readOnly: true
+      volumes:
+        - name: pgdata
+          persistentVolumeClaim:
+            claimName: genai-pgvector-storage
+        - name: init-scripts
+          configMap:
+            name: genai-pgvector-init
+            defaultMode: 493
+{{- end }}
