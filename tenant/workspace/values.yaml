@@ -9,6 +9,13 @@ tenant:
 
 namespacePrefix: wksp
 
+# GenAI playground (OGXServer llama-stack distribution)
+playground:
+  enabled: true
+  name: lsd-genai-playground
+  maxTokens: "16384"
+  # maasBaseUrl defaults to https://maas.<tenant.domain>/v1
+
 # DevWorkspace configuration
 devworkspace:
   name: exercises
