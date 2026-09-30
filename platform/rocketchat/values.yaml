@@ -463,7 +463,9 @@ nats:
   #   - microservices.enabled: false, nats.enabled: nil/false = Monolith RC without NATS
   #
   # To deploy NATS, uncomment and set enabled: true below. To use an external NATS, set enabled: false.
-  # enabled: true
+  # Set explicitly: with nats.enabled nil, Helm's first-condition-wins keeps the subchart deployed
+  # even in monolith mode (microservices.enabled=false).
+  enabled: false
 
   # For using an external NATS server, uncomment and set existingSecret below with the name of a Kubernetes Secret containing the connection string
   # existingSecret:
