@@ -20,6 +20,9 @@ rules:
 - apiGroups: [""]
   resources: ["secrets"]
   verbs: ["create", "get", "update", "patch"]
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["get", "patch"]
 ---
 # RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
@@ -163,6 +166,7 @@ spec:
 
           # Create secret in MCP namespace
           echo "Creating Kubernetes secret: $SECRET_NAME in namespace: $MCP_NAMESPACE..."
+          OLD_TOKEN=$(kubectl get secret "$SECRET_NAME" -n "$MCP_NAMESPACE" -o jsonpath='{.data.auth-token}' 2>/dev/null | base64 -d)
           kubectl create secret generic "$SECRET_NAME" \
             --from-literal=auth-token="$BOT_TOKEN" \
             --from-literal=user-id="$BOT_USER_ID" \
@@ -174,6 +178,14 @@ spec:
           else
             echo "ERROR: Failed to create secret"
             exit 1
+          fi
+
+          # Restart the MCP server when the rotated token differs from what its
+          # pods already hold (env from secretKeyRef is only read at pod start)
+          if [ "$OLD_TOKEN" != "$BOT_TOKEN" ]; then
+            echo "Token rotated - restarting MCP server deployment..."
+            kubectl rollout restart deployment/{{ .Values.botUser.mcpDeploymentName | default "rocketchat-mcp" }} -n "$MCP_NAMESPACE"
+            echo "✓ MCP server restarted to pick up the new token"
           fi
 
           {{- if .Values.botUser.createWorkshopChannel }}

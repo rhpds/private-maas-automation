@@ -552,6 +552,7 @@ botUser:
   password: "mcp-bot-password"
   # Where to create the secret for rocketchat-mcp
   mcpNamespace: "lls-demo"
+  mcpDeploymentName: "rocketchat-mcp"
   secretName: "rocketchat-mcp-credentials"
   rocketchatUrl: "http://rocketchat-rocketchat.rocketchat.svc.cluster.local"
 
