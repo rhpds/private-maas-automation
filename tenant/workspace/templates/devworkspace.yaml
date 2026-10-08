@@ -6,14 +6,23 @@ metadata:
   namespace: {{ .Values.namespacePrefix }}-{{ .Values.tenant.username }}
   labels:
     {{- include "workspace.labels" . | nindent 4 }}
-    app.kubernetes.io/component: devworkspace
+  {{- with .Values.devworkspace.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   routingClass: che
   started: true
   contributions:
-    - name: ide
+    - name: editor
       uri: http://devspaces-dashboard.openshift-devspaces.svc.cluster.local:8080/dashboard/api/editors/devfile?che-editor=che-incubator/che-code/latest
   template:
+    attributes:
+      controller.devfile.io/devworkspace-config:
+        name: devworkspace-config
+        namespace: openshift-devspaces
+      controller.devfile.io/scc: container-build
+      controller.devfile.io/storage-type: per-user
     projects:
       - name: {{ .Values.devworkspace.name }}
         git:

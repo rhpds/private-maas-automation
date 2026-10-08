@@ -25,6 +25,10 @@ devworkspace:
   projects:
     repoUrl: https://github.com/rh-ai-quickstart/maas-code-assistant.git
     revision: main
+  annotations:
+    che.eclipse.org/che-editor: che-incubator/che-code/latest
+    che.eclipse.org/devfile: |
+      schemaVersion: 2.2.0
   components:
     - name: universal-developer-image
       container:
