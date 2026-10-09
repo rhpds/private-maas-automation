@@ -23,7 +23,7 @@ playground:
 devworkspace:
   name: exercises
   projects:
-    repoUrl: https://github.com/taylorjordanNC/coding-exercises.git
+    repoUrl: https://github.com/jharmison-redhat/coding-exercises.git
     revision: main
   annotations:
     che.eclipse.org/che-editor: che-incubator/che-code/latest
