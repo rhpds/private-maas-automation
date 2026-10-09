@@ -23,7 +23,7 @@ playground:
 devworkspace:
   name: exercises
   projects:
-    repoUrl: https://github.com/rh-ai-quickstart/maas-code-assistant.git
+    repoUrl: https://github.com/taylorjordanNC/coding-exercises.git
     revision: main
   annotations:
     che.eclipse.org/che-editor: che-incubator/che-code/latest
