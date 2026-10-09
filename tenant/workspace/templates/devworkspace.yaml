@@ -39,12 +39,15 @@ spec:
           sourceMapping: {{ .container.sourceMapping | default "/projects" }}
           {{- if .container.env }}
           env:
-            {{- toYaml .container.env | nindent 10 }}
+            {{- toYaml .container.env | nindent 12 }}
           {{- else }}
           env:
             - name: CHE_DASHBOARD_URL
               value: https://devspaces.{{ $.Values.tenant.domain }}
           {{- end }}
+          {{- with .container.resources }}
+          {{- toYaml . | nindent 10 }}
+          {{- end}}
       {{- end }}
       {{- else if .Values.devworkspace.image }}
       - name: dev-container
