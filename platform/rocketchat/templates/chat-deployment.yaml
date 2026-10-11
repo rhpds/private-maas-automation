@@ -30,7 +30,7 @@ spec:
 {{ toYaml .Values.podLabels | indent 8 }}
         {{- end }}
       annotations:  
-          {{ include "rocketchat.annotations" (dict "name" "meteor" "context" $) | indent 8 }}
+          {{ include "rocketchat.annotations" (dict "context" $) | indent 8 }}
         checksum/secret: {{ include (print .Template.BasePath "/secret.yaml") . | sha256sum }}
 
     spec:
@@ -114,29 +114,8 @@ spec:
           value: "true"
         - name: OVERWRITE_SETTING_Prometheus_Port
           value: "{{ .Values.prometheusScraping.port }}"
-        {{- if and .Values.prometheusScraping.enabled .Values.microservices.enabled }}
-        - name: MS_METRICS
-          value: "true"
-        - name: MS_METRICS_PORT
-          value: {{ .Values.prometheusScraping.msPort | default "9458" | quote }}
         {{- end }}
-        {{- end }}
-        # Environment variables for microservices option
         {{- include "rocketchat.transporter.connectionString" (dict "Values" $.Values "Release" $.Release) | nindent 8 }}
-        {{- if .Values.microservices.enabled }}
-        {{- if eq (include "rocketchat.streamHub.enabled" .) "true" }}
-        - name: DB_WATCHERS
-          value: "true"
-        {{- end }}
-        - name: MOLECULER_LOG_LEVEL
-          value: {{ .Values.microservices.logLevel | quote }}
-        - name: HEARTBEAT_INTERVAL
-          value: {{ .Values.microservices.heartbeatInterval | quote }}
-        - name: HEARTBEAT_TIMEOUT
-          value: {{ .Values.microservices.heartbeatTimeout | quote }}
-        - name: RETRY_ENABLED
-          value: 'yes'
-        {{- end }} # end of microservices envvar. options
         # Settings overrides (consolidated in chart default values.yaml)
         - name: OVERWRITE_SETTING_Show_Setup_Wizard
           value: {{ .Values.settings.skipSetupWizard | ternary "completed" "pending" | quote }}
@@ -205,10 +184,6 @@ spec:
         {{- if .Values.prometheusScraping.enabled }}
         - name: metrics
           containerPort: {{ .Values.prometheusScraping.port }}
-        {{- if .Values.microservices.enabled }}
-        - name: ms-metrics
-          containerPort: {{ .Values.prometheusScraping.msPort }}
-        {{- end }}
         {{- end }}
         {{- if .Values.livenessProbe.enabled }}
         livenessProbe:
@@ -256,13 +231,13 @@ spec:
       {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumes "context" $) | nindent 6 }}
       {{- end }}
       nodeSelector:
-        {{ include "rocketchat.nodeSelector" (dict "name" "meteor" "context" $) | indent 8 }} 
+        {{ include "rocketchat.nodeSelector" (dict "context" $) | indent 8 }} 
       tolerations:
-        {{ include "rocketchat.tolerations" (dict "name" "meteor" "context" $) | indent 8 }}
+        {{ include "rocketchat.tolerations" (dict "context" $) | indent 8 }}
 {{- if or .Values.podAntiAffinity .Values.affinity }}
       affinity:
 {{- if .Values.affinity }}
-        {{ include "rocketchat.nodeAffinity" (dict "name" "meteor"  "context" $) | indent 10 }}
+        {{ include "rocketchat.nodeAffinity" (dict "context" $) | indent 10 }}
 {{- end }}
 {{- if eq .Values.podAntiAffinity "hard" }}
         podAntiAffinity:

@@ -22,9 +22,6 @@ spec:
         route:
           {{- toYaml .Values.rocketchat.route | nindent 10 }}
 
-        microservices:
-          {{- toYaml .Values.rocketchat.microservices | nindent 10 }}
-
         resources:
           {{- toYaml .Values.rocketchat.resources | nindent 10 }}
 

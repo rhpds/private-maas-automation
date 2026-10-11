@@ -34,10 +34,6 @@ spec:
   podMetricsEndpoints:
     - port: metrics
       interval: {{ .Values.podMonitor.interval | quote }}
-{{- if .Values.microservices.enabled }}
-    - port: ms-metrics
-      interval: {{ .Values.podMonitor.interval | quote }}
-{{- end }}
   selector:
     matchLabels:
       app.kubernetes.io/instance: {{ .Release.Name }}
