@@ -110,6 +110,29 @@ spec:
           fi
           echo "✓ Admin login successful (User ID: $ADMIN_ID)"
 
+          # Ensure the admin is a member of the built-in #general channel
+          echo "Ensuring admin is a member of #general..."
+          GENERAL_INFO=$(curl -s -X GET "$RC_URL/api/v1/channels.info?roomName=general" \
+            -H "X-Auth-Token: $AUTH_TOKEN" \
+            -H "X-User-Id: $ADMIN_ID")
+
+          GENERAL_ID=$(echo "$GENERAL_INFO" | grep -o '"_id":"[^"]*"' | head -1 | cut -d'"' -f4)
+
+          if [ -z "$GENERAL_ID" ]; then
+            echo "⚠ #general channel not found - skipping admin join"
+          else
+            GENERAL_INVITE_RESPONSE=$(curl -s -X POST "$RC_URL/api/v1/channels.invite" \
+              -H "X-Auth-Token: $AUTH_TOKEN" \
+              -H "X-User-Id: $ADMIN_ID" \
+              -H "Content-Type: application/json" \
+              -d "{\"roomId\":\"$GENERAL_ID\",\"userId\":\"$ADMIN_ID\"}")
+            if echo "$GENERAL_INVITE_RESPONSE" | grep -q '"success":true'; then
+              echo "✓ Admin added to #general"
+            else
+              echo "⚠ Invite response: $GENERAL_INVITE_RESPONSE (admin may already be a member of #general)"
+            fi
+          fi
+
           # Check if bot user exists
           echo "Checking if bot user exists: $BOT_USERNAME..."
           USER_INFO_RESPONSE=$(curl -s -X GET "$RC_URL/api/v1/users.info?username=$BOT_USERNAME" \
