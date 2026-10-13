@@ -1,0 +1,31 @@
+---
+# Pre-requisite: apply CheCluster CRD stub before DevSpaces operator installs.
+# DevSpaces v3.28.x has a circular OLM dependency — the CSV requires
+# checlusters.org.eclipse.che to be present before it will install, but
+# that CRD is only created by the operator itself. Applying a minimal stub
+# with x-kubernetes-preserve-unknown-fields: true unblocks OLM. The operator
+# will replace this with the full CRD schema once installed.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: devspaces-crd-prereq
+  namespace: openshift-gitops
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    name: in-cluster
+    namespace: openshift-gitops
+  project: default
+  source:
+    path: infra/devspaces-crd-prereq
+    repoURL: {{ .Values.bootstrap.repoURL }}
+    targetRevision: {{ .Values.bootstrap.targetRevision }}
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true

@@ -20,6 +20,9 @@ rules:
 - apiGroups: [""]
   resources: ["secrets"]
   verbs: ["create", "get", "update", "patch"]
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["get", "patch"]
 ---
 # RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
@@ -107,6 +110,29 @@ spec:
           fi
           echo "✓ Admin login successful (User ID: $ADMIN_ID)"
 
+          # Ensure the admin is a member of the built-in #general channel
+          echo "Ensuring admin is a member of #general..."
+          GENERAL_INFO=$(curl -s -X GET "$RC_URL/api/v1/channels.info?roomName=general" \
+            -H "X-Auth-Token: $AUTH_TOKEN" \
+            -H "X-User-Id: $ADMIN_ID")
+
+          GENERAL_ID=$(echo "$GENERAL_INFO" | grep -o '"_id":"[^"]*"' | head -1 | cut -d'"' -f4)
+
+          if [ -z "$GENERAL_ID" ]; then
+            echo "⚠ #general channel not found - skipping admin join"
+          else
+            GENERAL_INVITE_RESPONSE=$(curl -s -X POST "$RC_URL/api/v1/channels.invite" \
+              -H "X-Auth-Token: $AUTH_TOKEN" \
+              -H "X-User-Id: $ADMIN_ID" \
+              -H "Content-Type: application/json" \
+              -d "{\"roomId\":\"$GENERAL_ID\",\"userId\":\"$ADMIN_ID\"}")
+            if echo "$GENERAL_INVITE_RESPONSE" | grep -q '"success":true'; then
+              echo "✓ Admin added to #general"
+            else
+              echo "⚠ Invite response: $GENERAL_INVITE_RESPONSE (admin may already be a member of #general)"
+            fi
+          fi
+
           # Check if bot user exists
           echo "Checking if bot user exists: $BOT_USERNAME..."
           USER_INFO_RESPONSE=$(curl -s -X GET "$RC_URL/api/v1/users.info?username=$BOT_USERNAME" \
@@ -163,6 +189,7 @@ spec:
 
           # Create secret in MCP namespace
           echo "Creating Kubernetes secret: $SECRET_NAME in namespace: $MCP_NAMESPACE..."
+          OLD_TOKEN=$(kubectl get secret "$SECRET_NAME" -n "$MCP_NAMESPACE" -o jsonpath='{.data.auth-token}' 2>/dev/null | base64 -d)
           kubectl create secret generic "$SECRET_NAME" \
             --from-literal=auth-token="$BOT_TOKEN" \
             --from-literal=user-id="$BOT_USER_ID" \
@@ -174,6 +201,14 @@ spec:
           else
             echo "ERROR: Failed to create secret"
             exit 1
+          fi
+
+          # Restart the MCP server when the rotated token differs from what its
+          # pods already hold (env from secretKeyRef is only read at pod start)
+          if [ "$OLD_TOKEN" != "$BOT_TOKEN" ]; then
+            echo "Token rotated - restarting MCP server deployment..."
+            kubectl rollout restart deployment/{{ .Values.botUser.mcpDeploymentName | default "rocketchat-mcp" }} -n "$MCP_NAMESPACE"
+            echo "✓ MCP server restarted to pick up the new token"
           fi
 
           {{- if .Values.botUser.createWorkshopChannel }}
@@ -190,47 +225,70 @@ spec:
           CHANNEL_ID=$(echo "$CHANNEL_INFO" | grep -o '"_id":"[^"]*"' | head -1 | cut -d'"' -f4)
 
           if [ -z "$CHANNEL_ID" ]; then
-            # Create the channel
+            # Create the channel (name-only: RC 8.8.1 schema validation rejects
+            # additional properties like members/topic/description on create)
             echo "Creating #$CHANNEL_NAME channel..."
             CREATE_CHANNEL=$(curl -s -X POST "$RC_URL/api/v1/channels.create" \
               -H "X-Auth-Token: $AUTH_TOKEN" \
               -H "X-User-Id: $ADMIN_ID" \
               -H "Content-Type: application/json" \
-              -d "{
-                \"name\":\"$CHANNEL_NAME\",
-                \"members\":[\"$BOT_USER_ID\"],
-                \"topic\":\"{{ .Values.botUser.workshopChannelTopic }}\",
-                \"description\":\"{{ .Values.botUser.workshopChannelDescription }}\"
-              }")
+              -d "{\"name\":\"$CHANNEL_NAME\"}")
 
             CHANNEL_ID=$(echo "$CREATE_CHANNEL" | grep -o '"_id":"[^"]*"' | head -1 | cut -d'"' -f4)
 
             if [ -z "$CHANNEL_ID" ]; then
-              echo "⚠ Warning: Failed to create channel #$CHANNEL_NAME"
+              echo "ERROR: Failed to create channel #$CHANNEL_NAME"
               echo "Response: $CREATE_CHANNEL"
-            else
-              echo "✓ Channel #$CHANNEL_NAME created (ID: $CHANNEL_ID)"
-
-              # Make it a default channel so all users auto-join
-              echo "  Setting #$CHANNEL_NAME as default channel (all users auto-join)..."
-              curl -s -X POST "$RC_URL/api/v1/channels.setDefault" \
-                -H "X-Auth-Token: $AUTH_TOKEN" \
-                -H "X-User-Id: $ADMIN_ID" \
-                -H "Content-Type: application/json" \
-                -d "{\"roomId\":\"$CHANNEL_ID\",\"default\":true}" > /dev/null
-              echo "  ✓ All users will auto-join #$CHANNEL_NAME"
-
-              # Post welcome message
-              {{- if .Values.botUser.workshopWelcomeMessage }}
-              echo "  Posting welcome message..."
-              curl -s -X POST "$RC_URL/api/v1/chat.postMessage" \
-                -H "X-Auth-Token: $AUTH_TOKEN" \
-                -H "X-User-Id: $ADMIN_ID" \
-                -H "Content-Type: application/json" \
-                -d "{\"channel\":\"#$CHANNEL_NAME\",\"text\":\"{{ .Values.botUser.workshopWelcomeMessage }}\"}" > /dev/null
-              echo "  ✓ Welcome message posted"
-              {{- end }}
+              exit 1
             fi
+            echo "✓ Channel #$CHANNEL_NAME created (ID: $CHANNEL_ID)"
+
+            # Add the bot to the channel (separate call; create payload is name-only)
+            echo "  Adding bot to #$CHANNEL_NAME..."
+            INVITE_RESPONSE=$(curl -s -X POST "$RC_URL/api/v1/channels.invite" \
+              -H "X-Auth-Token: $AUTH_TOKEN" \
+              -H "X-User-Id: $ADMIN_ID" \
+              -H "Content-Type: application/json" \
+              -d "{\"roomId\":\"$CHANNEL_ID\",\"userId\":\"$BOT_USER_ID\"}")
+            if echo "$INVITE_RESPONSE" | grep -q '"success":true'; then
+              echo "  ✓ Bot added to #$CHANNEL_NAME"
+            else
+              echo "  ⚠ Invite response: $INVITE_RESPONSE (bot may already be a member)"
+            fi
+
+            # Set topic and description via their own endpoints
+            echo "  Setting topic and description..."
+            curl -s -X POST "$RC_URL/api/v1/channels.setTopic" \
+              -H "X-Auth-Token: $AUTH_TOKEN" \
+              -H "X-User-Id: $ADMIN_ID" \
+              -H "Content-Type: application/json" \
+              -d "{\"roomId\":\"$CHANNEL_ID\",\"topic\":\"{{ .Values.botUser.workshopChannelTopic }}\"}" > /dev/null
+            curl -s -X POST "$RC_URL/api/v1/channels.setDescription" \
+              -H "X-Auth-Token: $AUTH_TOKEN" \
+              -H "X-User-Id: $ADMIN_ID" \
+              -H "Content-Type: application/json" \
+              -d "{\"roomId\":\"$CHANNEL_ID\",\"description\":\"{{ .Values.botUser.workshopChannelDescription }}\"}" > /dev/null
+            echo "  ✓ Topic and description set"
+
+            # Make it a default channel so all users auto-join
+            echo "  Setting #$CHANNEL_NAME as default channel (all users auto-join)..."
+            curl -s -X POST "$RC_URL/api/v1/channels.setDefault" \
+              -H "X-Auth-Token: $AUTH_TOKEN" \
+              -H "X-User-Id: $ADMIN_ID" \
+              -H "Content-Type: application/json" \
+              -d "{\"roomId\":\"$CHANNEL_ID\",\"default\":true}" > /dev/null
+            echo "  ✓ All users will auto-join #$CHANNEL_NAME"
+
+            # Post welcome message
+            {{- if .Values.botUser.workshopWelcomeMessage }}
+            echo "  Posting welcome message..."
+            curl -s -X POST "$RC_URL/api/v1/chat.postMessage" \
+              -H "X-Auth-Token: $AUTH_TOKEN" \
+              -H "X-User-Id: $ADMIN_ID" \
+              -H "Content-Type: application/json" \
+              -d "{\"channel\":\"#$CHANNEL_NAME\",\"text\":\"{{ .Values.botUser.workshopWelcomeMessage }}\"}" > /dev/null
+            echo "  ✓ Welcome message posted"
+            {{- end }}
           else
             echo "✓ Channel #$CHANNEL_NAME already exists (ID: $CHANNEL_ID)"
           fi

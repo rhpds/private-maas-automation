@@ -1,0 +1,162 @@
+#!/bin/bash
+
+set -e
+
+# Wait for Rocket.Chat to be ready
+echo "Waiting for Rocket.Chat to be ready..."
+MAX_RETRIES=60
+RETRY_COUNT=0
+until curl -sf "$RC_URL/api/info" > /dev/null 2>&1; do
+  RETRY_COUNT=$((RETRY_COUNT+1))
+  if [ $RETRY_COUNT -ge $MAX_RETRIES ]; then
+    echo "ERROR: Rocket.Chat did not become ready in time"
+    exit 1
+  fi
+  echo "Rocket.Chat not ready yet, waiting 5s... ($RETRY_COUNT/$MAX_RETRIES)"
+  sleep 5
+done
+echo "✓ Rocket.Chat is ready!"
+
+# Login as admin
+echo "Logging in as admin user: $ADMIN_USER..."
+LOGIN_RESPONSE=$(curl -s -X POST "$RC_URL/api/v1/login" \
+  -H "Content-Type: application/json" \
+  -d "{\"user\":\"$ADMIN_USER\",\"password\":\"$ADMIN_PASS\"}")
+
+AUTH_TOKEN=$(echo "$LOGIN_RESPONSE" | grep -o '"authToken":"[^"]*"' | cut -d'"' -f4)
+ADMIN_ID=$(echo "$LOGIN_RESPONSE" | grep -o '"userId":"[^"]*"' | cut -d'"' -f4)
+
+if [ -z "$AUTH_TOKEN" ]; then
+  echo "ERROR: Failed to login as admin"
+  echo "Response: $LOGIN_RESPONSE"
+  exit 1
+fi
+echo "✓ Admin login successful (User ID: $ADMIN_ID)"
+
+# Disable 2FA email auto-opt-in to prevent TOTP errors during tenant login
+# Uses password-based 2FA fallback (SHA256 hash of admin password)
+echo "Disabling 2FA email auto-opt-in..."
+PASSWORD_HASH=$(echo -n "$ADMIN_PASS" | sha256sum | cut -d' ' -f1)
+for SETTING in Accounts_TwoFactorAuthentication_By_Email_Auto_Opt_In Accounts_TwoFactorAuthentication_By_Email_Enabled Accounts_TwoFactorAuthentication_Enabled; do
+  DISABLE_RESPONSE=$(curl -s -X POST "$RC_URL/api/v1/settings/$SETTING" \
+    -H "X-Auth-Token: $AUTH_TOKEN" \
+    -H "X-User-Id: $ADMIN_ID" \
+    -H "x-2fa-code: $PASSWORD_HASH" \
+    -H "x-2fa-method: password" \
+    -H "Content-Type: application/json" \
+    -d '{"value":false}')
+  SETTING_OK=$(echo "$DISABLE_RESPONSE" | grep -o '"success":true')
+  if [ -n "$SETTING_OK" ]; then
+    echo "  ✓ $SETTING disabled"
+  else
+    echo "  ⚠ $SETTING: $DISABLE_RESPONSE (may already be disabled)"
+  fi
+done
+
+# Check if tenant user exists
+echo "Checking if tenant user exists: $TENANT_USERNAME..."
+USER_INFO_RESPONSE=$(curl -s -X GET "$RC_URL/api/v1/users.info?username=$TENANT_USERNAME" \
+  -H "X-Auth-Token: $AUTH_TOKEN" \
+  -H "X-User-Id: $ADMIN_ID")
+
+TENANT_USER_ID=$(echo "$USER_INFO_RESPONSE" | grep -o '"_id":"[^"]*"' | head -1 | cut -d'"' -f4)
+
+if [ -z "$TENANT_USER_ID" ]; then
+  # Create tenant user with 'user' role (standard permissions)
+  echo "Creating tenant user: $TENANT_USERNAME..."
+  CREATE_RESPONSE=$(curl -s -X POST "$RC_URL/api/v1/users.create" \
+    -H "X-Auth-Token: $AUTH_TOKEN" \
+    -H "X-User-Id: $ADMIN_ID" \
+    -H "Content-Type: application/json" \
+    -d "{
+      \"name\":\"$TENANT_NAME\",
+      \"email\":\"$TENANT_EMAIL\",
+      \"password\":\"$TENANT_PASS\",
+      \"username\":\"$TENANT_USERNAME\",
+      \"roles\":[\"user\"],
+      \"joinDefaultChannels\":true,
+      \"requirePasswordChange\":false,
+      \"sendWelcomeEmail\":false,
+      \"verified\":true
+    }")
+
+  TENANT_USER_ID=$(echo "$CREATE_RESPONSE" | grep -o '"_id":"[^"]*"' | head -1 | cut -d'"' -f4)
+
+  if [ -z "$TENANT_USER_ID" ]; then
+    echo "ERROR: Failed to create tenant user"
+    echo "Response: $CREATE_RESPONSE"
+    exit 1
+  fi
+  echo "✓ Tenant user created successfully"
+else
+  echo "✓ Tenant user already exists"
+fi
+echo "Tenant User ID: $TENANT_USER_ID"
+
+# Set permissions for read-only (except posting)
+# This prevents user from deleting messages, channels, or modifying settings
+echo "Configuring user permissions (read + post only)..."
+
+# Get current user permissions
+PERMISSIONS_RESPONSE=$(curl -s -X GET "$RC_URL/api/v1/users.info?userId=$TENANT_USER_ID" \
+  -H "X-Auth-Token: $AUTH_TOKEN" \
+  -H "X-User-Id: $ADMIN_ID")
+
+# Update user to ensure they only have 'user' role (not admin, not moderator)
+UPDATE_RESPONSE=$(curl -s -X POST "$RC_URL/api/v1/users.update" \
+  -H "X-Auth-Token: $AUTH_TOKEN" \
+  -H "X-User-Id: $ADMIN_ID" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"userId\":\"$TENANT_USER_ID\",
+    \"data\":{
+      \"roles\":[\"user\"]
+    }
+  }")
+
+echo "✓ User permissions configured (standard user role - can read and post)"
+
+# Login as tenant user to get auth token
+echo "Logging in as tenant user to generate auth token..."
+TENANT_LOGIN_RESPONSE=$(curl -s -X POST "$RC_URL/api/v1/login" \
+  -H "Content-Type: application/json" \
+  -d "{\"user\":\"$TENANT_USERNAME\",\"password\":\"$TENANT_PASS\"}")
+
+TENANT_TOKEN=$(echo "$TENANT_LOGIN_RESPONSE" | grep -o '"authToken":"[^"]*"' | cut -d'"' -f4)
+
+if [ -z "$TENANT_TOKEN" ]; then
+  echo "ERROR: Failed to create tenant user token"
+  echo "Response: $TENANT_LOGIN_RESPONSE"
+  exit 1
+fi
+echo "✓ Tenant user token created successfully"
+
+# Create secret in tenant namespace
+echo "Creating Kubernetes secret: $OUTPUT_SECRET_NAME in namespace: $NAMESPACE..."
+oc create secret generic "$OUTPUT_SECRET_NAME" \
+  --from-literal=auth-token="$TENANT_TOKEN" \
+  --from-literal=user-id="$TENANT_USER_ID" \
+  --from-literal=username="$TENANT_USERNAME" \
+  --from-literal=password="$TENANT_PASS" \
+  --from-literal=rocketchat-url="$RC_URL" \
+  --namespace="$NAMESPACE" \
+  --dry-run=client -o yaml | oc apply -f -
+
+if [ $? -eq 0 ]; then
+  echo "✓ Secret created successfully!"
+else
+  echo "ERROR: Failed to create secret"
+  exit 1
+fi
+
+echo ""
+echo "═══════════════════════════════════════════"
+echo "  Tenant RocketChat User Setup Complete!"
+echo "═══════════════════════════════════════════"
+echo "  Username:     $TENANT_USERNAME"
+echo "  User ID:      $TENANT_USER_ID"
+echo "  Email:        $TENANT_EMAIL"
+echo "  Secret:       $OUTPUT_SECRET_NAME"
+echo "  Namespace:    $NAMESPACE"
+echo "  Permissions:  Read + Post (no delete/modify)"
+echo "═══════════════════════════════════════════"

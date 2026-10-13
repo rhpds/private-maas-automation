@@ -1,11 +1,14 @@
 bootstrap:
   repoURL: https://github.com/rhpds/private-maas-automation
   targetRevision: main
+  createNamespace: false
+
+workspaceNamespacePrefix: wksp
 
 tenant:
   username: user1
   domain: apps.cluster.example.com
-  tier: enterprise
+  group: premium-users
 
 # RocketChat tenant user configuration
 rocketchat:

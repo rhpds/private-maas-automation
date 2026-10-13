@@ -1,9 +1,4 @@
-defaultServingImage: registry.redhat.io/rhaiis/vllm-cuda-rhel9:3.3.0
-
-defaultModelTiers:
-  - free
-  - premium
-  - enterprise
+defaultServingImage: registry.redhat.io/rhaii/vllm-cuda-rhel9:3.5.1
 
 models:
   - name: nemotron-3-nano-30b-a3b

@@ -1,0 +1,7 @@
+operators:
+  cluster-observability-operator:
+    channel: stable
+    namespace: openshift-cluster-observability-operator
+    installPlanApproval: Automatic
+    operatorGroup:
+      enabled: true

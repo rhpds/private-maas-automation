@@ -5,7 +5,7 @@ metadata:
   name: models-as-a-service
   namespace: openshift-gitops
   annotations:
-    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-wave: "2"
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
@@ -17,17 +17,17 @@ spec:
     repoURL: {{ .Values.bootstrap.repoURL }}
     targetRevision: {{ .Values.bootstrap.targetRevision }}
     path: platform/models-as-a-service
-    helm:
-      valuesObject:
-        deployer:
-          domain: {{ .Values.deployer.domain }}
-          certificateName: cert-manager-ingress-cert
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - RespectIgnoreDifferences=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 30s
+        factor: 2
   ignoreDifferences:
     - kind: Group
       group: user.openshift.io

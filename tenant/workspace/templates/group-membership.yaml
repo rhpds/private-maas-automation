@@ -1,0 +1,67 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: group-manager-{{ .Values.tenant.username }}
+  namespace: {{ .Values.namespacePrefix }}-{{ .Values.tenant.username }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: group-manager-{{ .Values.tenant.username }}
+rules:
+- apiGroups:
+  - user.openshift.io
+  resources:
+  - groups
+  resourceNames:
+  - {{ .Values.tenant.group }}
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - user.openshift.io
+  resources:
+  - groups
+  verbs:
+  - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: group-manager-{{ .Values.tenant.username }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: group-manager-{{ .Values.tenant.username }}
+subjects:
+- kind: ServiceAccount
+  name: group-manager-{{ .Values.tenant.username }}
+  namespace: {{ .Values.namespacePrefix }}-{{ .Values.tenant.username }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: add-group-{{ .Values.tenant.username }}
+  namespace: {{ .Values.namespacePrefix }}-{{ .Values.tenant.username }}
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 4
+  template:
+    spec:
+      serviceAccountName: group-manager-{{ .Values.tenant.username }}
+      restartPolicy: OnFailure
+      containers:
+      - name: add-to-group
+        image: image-registry.openshift-image-registry.svc:5000/openshift/tools:latest
+        command:
+        - /bin/bash
+        - -c
+        - |
+          if ! oc get group {{ .Values.tenant.group }} &>/dev/null; then
+            oc adm groups new {{ .Values.tenant.group }}
+          fi
+          oc adm groups add-users {{ .Values.tenant.group }} {{ .Values.tenant.username }}

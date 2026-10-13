@@ -17,6 +17,8 @@ spec:
         bootstrap:
           repoURL: {{ .Values.bootstrap.repoURL }}
           targetRevision: {{ .Values.bootstrap.targetRevision }}
+        deployer:
+          domain: {{ .Values.deployer.domain }}
   destination:
     name: in-cluster
     namespace: openshift-gitops

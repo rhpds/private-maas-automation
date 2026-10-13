@@ -16,7 +16,7 @@ spec:
   sources:
   - path: charts/install-operators
     repoURL: https://github.com/jharmison-redhat/openshift-setup
-    targetRevision: ed8c06994034e591f5540e982f9d0b778504d4cc
+    targetRevision: 98b94f4694d0e71eca743228066ccf9b8c6fe1ca
     helm:
       valueFiles:
         - $values/infra/devspaces-operator/values.yaml

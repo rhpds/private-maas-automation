@@ -1,11 +1,8 @@
-{{/* if nats.podmonitor.enabled is true, microservices enabled and nats is nil or nats.enabled is true */}}
+{{/* if nats.podmonitor.enabled is true and nats is enabled */}}
 {{- if
   and 
     .Values.nats.podMonitor.enabled
-    (or
-      (and (hasKey .Values.microservices "enabled") (.Values.microservices.enabled) (not (hasKey .Values.nats "enabled")))
-      (and (hasKey .Values.nats "enabled") (.Values.nats.enabled))
-    )
+    (and (hasKey .Values.nats "enabled") (.Values.nats.enabled))
 -}}
 
 {{ if (.Capabilities.APIVersions.Has "monitoring.coreos.com/v1") }}

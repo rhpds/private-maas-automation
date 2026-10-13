@@ -1,7 +1,0 @@
-operators:
-  rhods-operator:
-    channel: stable-3.3
-    installPlanApproval: Automatic
-    namespace: redhat-ods-operator
-    operatorGroup:
-      enabled: true
