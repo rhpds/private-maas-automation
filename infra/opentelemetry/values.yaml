@@ -1,0 +1,4 @@
+operators:
+  opentelemetry-product:
+    channel: stable
+    installPlanApproval: Automatic

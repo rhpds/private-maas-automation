@@ -30,10 +30,6 @@ rocketchat:
       termination: edge
       insecureEdgeTerminationPolicy: Redirect
 
-  # Architecture configuration
-  microservices:
-    enabled: true
-
   # Resource limits for production stability
   resources:
     requests:
@@ -50,7 +46,7 @@ rocketchat:
       requests: 5Gi
       storageClassName: ''
 
-  # NATS configuration for microservices
+  # NATS configuration
   nats:
     resources:
       requests:
@@ -65,12 +61,6 @@ rocketchat:
     podMonitor:
       enabled: true
       interval: 30s
-
-  # Rocket.Chat settings overrides
-  settings:
-    skipSetupWizard: true
-    allowPublicRegistration: true
-    manuallyApproveNewUsers: false
 
   # Bot user automation - creates MCP bot and secret
   botUser:

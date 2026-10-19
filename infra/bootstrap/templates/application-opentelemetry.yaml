@@ -1,0 +1,35 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: opentelemetry
+  namespace: openshift-gitops
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    namespace: openshift-operators
+    name: in-cluster
+  project: default
+  sources:
+  - path: charts/install-operators
+    repoURL: https://github.com/jharmison-redhat/openshift-setup
+    targetRevision: 98b94f4694d0e71eca743228066ccf9b8c6fe1ca
+    helm:
+      valueFiles:
+        - $values/infra/opentelemetry/values.yaml
+  - repoURL: {{ .Values.bootstrap.repoURL }}
+    targetRevision: {{ .Values.bootstrap.targetRevision }}
+    ref: values
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 5
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 5m

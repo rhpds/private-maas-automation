@@ -16,19 +16,37 @@ spec:
   sources:
   - path: charts/openshift-ai
     repoURL: https://github.com/jharmison-redhat/openshift-setup
-    targetRevision: a751243da77b5fc15dff12c6bba4f8990783a06d
+    targetRevision: 98b94f4694d0e71eca743228066ccf9b8c6fe1ca
     helm:
       valueFiles:
         - $values/infra/openshift-ai/values.yaml
+      valuesObject:
+        gateways:
+          openshiftAiInference:
+            hostname: inference.{{ .Values.deployer.domain }}
+            certificate:
+              clusterIssuer: letsencrypt-production-aws-fallback
+          maasDefaultGateway:
+            hostname: maas.{{ .Values.deployer.domain }}
+            certificate:
+              clusterIssuer: letsencrypt-production-aws-fallback
   - repoURL: {{ .Values.bootstrap.repoURL }}
     targetRevision: {{ .Values.bootstrap.targetRevision }}
     ref: values
+  ignoreDifferences:
+  - group: postgresql.cnpg.io
+    kind: Cluster
+    jqPathExpressions:
+      - .spec.managed.roles[].connectionLimit
+      - .spec.managed.roles[].ensure
+      - .spec.managed.roles[].inherit
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - SkipDryRunOnMissingResource=true
+      - RespectIgnoreDifferences=true
       - ServerSideApply=true
     retry:
       limit: 10

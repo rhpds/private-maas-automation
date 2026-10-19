@@ -5,22 +5,40 @@
 tenant:
   username: user1
   domain: apps.cluster.example.com
-  tier: enterprise
+  group: premium-users
 
 namespacePrefix: wksp
+
+# GenAI playground (OGXServer llama-stack distribution)
+playground:
+  enabled: true
+  name: lsd-genai-playground
+  maxTokens: "16384"
+  # maasBaseUrl defaults to https://maas.<tenant.domain>/v1
+  # In-namespace pgvector DB password (ClusterIP only, no route)
+  # ponytail: fixed default, per-tenant override if isolation matters
+  pgvectorPassword: "vectoruser-password"
 
 # DevWorkspace configuration
 devworkspace:
   name: exercises
   projects:
-    repoUrl: https://github.com/rh-ai-quickstart/maas-code-assistant.git
+    repoUrl: https://github.com/jharmison-redhat/coding-exercises.git
     revision: main
+  annotations:
+    che.eclipse.org/che-editor: che-incubator/che-code/latest
+    che.eclipse.org/devfile: |
+      schemaVersion: 2.2.0
   components:
     - name: universal-developer-image
       container:
-        image: registry.redhat.io/devspaces/udi-rhel9:3.25.0
+        image: registry.redhat.io/devspaces/udi-rhel9:3.30
         sourceMapping: /projects
-        # Note: CHE_DASHBOARD_URL will be set dynamically by the template based on tenant.domain
+        resources:
+          memoryRequest: 4Gi
+          memoryLimit: 4Gi
+          cpuRequest: "1"
+          cpuLimit: "2"
 
 # RocketChat tenant user configuration
 rocketchat:

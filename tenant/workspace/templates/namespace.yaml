@@ -6,6 +6,7 @@ metadata:
   labels:
     app.kubernetes.io/part-of: che.eclipse.org
     app.kubernetes.io/component: workspaces-namespace
+    opendatahub.io/dashboard: "true"
   annotations:
     openshift.io/display-name: "Workspace {{ .Values.tenant.username }}"
     openshift.io/description: "Workspace Namespace"

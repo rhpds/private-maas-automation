@@ -49,7 +49,7 @@ podSecurityContext: {}
 defaultSecurityContext:
   allowPrivilegeEscalation: false
   capabilities:
-      drop:
+    drop:
       - ALL
   runAsNonRoot: true
 
@@ -113,7 +113,7 @@ nodeSelector: {}
 
 tolerations: []
 
-affinity: {}  
+affinity: {}
 
 # Path to the configuration file inside the container
 configFilePath: /etc/kubernetes-mcp-server/config.toml
@@ -124,8 +124,9 @@ config:
 
 # -- RBAC configuration for the MCP server
 rbac:
-  # -- Specifies whether to create a RoleBinding
   create: true
-  # -- ClusterRole to bind (default: edit)
-  # -- The edit ClusterRole allows read/write access to most resources in the namespace
-  clusterRole: edit
+  extraClusterRoleBindings:
+    - name: use-view-role
+      roleRef:
+        name: view
+        external: true # References the existing "view" ClusterRole directly

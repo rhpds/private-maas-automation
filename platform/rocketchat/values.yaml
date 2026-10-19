@@ -43,6 +43,18 @@ imagePullSecrets: []
 ## set it to a domain pointing to your loadbalancer
 # host:
 
+## Rocket.Chat settings overrides — rendered as OVERWRITE_SETTING_* env in chat-deployment.yaml.
+## Consolidated here (chart defaults) so they survive chart moves; the bootstrap app-of-apps
+## passes only ADMIN_* creds via extraEnv.
+settings:
+  skipSetupWizard: true            # OVERWRITE_SETTING_Show_Setup_Wizard (completed)
+  allowPublicRegistration: true    # OVERWRITE_SETTING_Accounts_RegistrationForm (Public)
+  manuallyApproveNewUsers: false   # OVERWRITE_SETTING_Accounts_ManuallyApproveNewUsers
+  twoFactorAuthEnabled: false          # OVERWRITE_SETTING_Accounts_TwoFactorAuthentication_Enabled
+  twoFactorAuthEmailEnabled: false     # OVERWRITE_SETTING_Accounts_TwoFactorAuthentication_By_Email_Enabled
+  twoFactorAuthEmailAutoOptIn: false   # OVERWRITE_SETTING_Accounts_TwoFactorAuthentication_By_Email_Auto_Opt_In
+  registerServer: false            # OVERWRITE_SETTING_Register_Server (workspace unregistered; no licensing push)
+
 replicaCount: 1
 minAvailable: 1
 
@@ -300,8 +312,7 @@ podAnnotations:
 ## Optional Prometheus scraping Settings
 prometheusScraping:
   enabled: true
-  port: 9100 # Avoid using 9458: conflicts with Moleculer Exporter
-  msPort: 9458
+  port: 9100
 
 # ServiceMonitor: Deprecated in favor of podMonitor
 serviceMonitor:
@@ -356,102 +367,11 @@ readinessProbe:
 podDisruptionBudget:
   enabled: true
 
-# # # # # # # # # # # # # # # # #
-#   M I C R O S E R V I C E S   #
-#  Only available to E.E users  #
-# # # # # # # # # # # # # # # # #
-
-## Deploy as microservices?
-# Monolithic architecture, by default
-microservices:
-  enabled: true
-
-  logLevel: warn
-
-  heartbeatInterval: 10
-  heartbeatTimeout: 30
-
-  ## Parameters for each deployment:
-  presence:
-    replicas: 1
-    image:
-      repository: rocketchat/presence-service
-      pullPolicy: IfNotPresent
-    securityContext: {}
-    resources: {}
-    # Tolerations for pod assignment
-    # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-    tolerations: []
-
-  ddpStreamer:
-    replicas: 1
-    image:
-      repository: rocketchat/ddp-streamer-service
-      pullPolicy: IfNotPresent
-    securityContext: {}
-    resources: {}
-    # Tolerations for pod assignment
-    # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-    tolerations: []
-
-  account:
-    replicas: 1
-    image:
-      repository: rocketchat/account-service
-      pullPolicy: IfNotPresent
-    securityContext: {}
-    resources: {}
-    # Tolerations for pod assignment
-    # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-    tolerations: []
-
-  authorization:
-    replicas: 1
-    image:
-      repository: rocketchat/authorization-service
-      pullPolicy: IfNotPresent
-    securityContext: {}
-    resources: {}
-    # Tolerations for pod assignment
-    # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-    tolerations: []
-
-  streamHub:
-    # IMPORTANT: Stream Hub is disabled by default as of Rocket.Chat 7.7.3
-    # For versions < 7.7.3, it will be automatically enabled unless explicitly disabled here
-    # After version 8.0.0, this service will be removed completely
-    # Note: When enabled, DB_WATCHERS=true is automatically set on all services
-    enabled: false
-    image:
-      repository: rocketchat/stream-hub-service
-      pullPolicy: IfNotPresent
-    securityContext: {}
-    resources: {}
-    # Tolerations for pod assignment
-    # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-    tolerations: []
-
-  ## Parameters for each Kubernetes service
-  # NOTE: reserved for future usage still
-  presenceService:
-  ddpStreamerService:
-  natsService:
-  streamHubService:
-  accountService:
-  authorizationService:
-
 nats:
   # Helm docs: https://helm.sh/docs/topics/charts/#tags-and-condition-resolution
   #
-  # IMPORTANT: Do not set nats.enabled here unless you want to override the default behavior.
-  # By default, nats.enabled is nil and its deployment is determined by microservices.enabled:
-  #   - microservices.enabled: true, nats.enabled: nil        = NATS is enabled and deployed internally, this is the default behavior
-  #   - microservices.enabled: true, nats.enabled: false      = NATS is NOT deployed (use external NATS)
-  #   - microservices.enabled: false, nats.enabled: true      = Monolith RC with NATS deployed
-  #   - microservices.enabled: false, nats.enabled: nil/false = Monolith RC without NATS
-  #
   # To deploy NATS, uncomment and set enabled: true below. To use an external NATS, set enabled: false.
-  # enabled: true
+  enabled: false
 
   # For using an external NATS server, uncomment and set existingSecret below with the name of a Kubernetes Secret containing the connection string
   # existingSecret:
@@ -538,6 +458,7 @@ botUser:
   password: "mcp-bot-password"
   # Where to create the secret for rocketchat-mcp
   mcpNamespace: "lls-demo"
+  mcpDeploymentName: "rocketchat-mcp"
   secretName: "rocketchat-mcp-credentials"
   rocketchatUrl: "http://rocketchat-rocketchat.rocketchat.svc.cluster.local"
 
