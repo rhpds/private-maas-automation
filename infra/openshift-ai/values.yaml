@@ -3,7 +3,7 @@ install-rhoai:
     rhods-operator:
       channel: stable-3.5
       installPlanApproval: Manual
-      startingCSV: rhods-operator.3.5.1
+      startingCSV: rhods-operator.3.5.2
 
 dataScienceCluster:
   version: v2
